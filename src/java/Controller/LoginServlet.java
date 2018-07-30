@@ -1,0 +1,114 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Controller;
+
+import dao.LoginDao;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ *
+ * @author Moses
+ */
+public class LoginServlet extends HttpServlet {
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            String enteredUsername = request.getParameter("username");
+            String enteredPassword = request.getParameter("password");
+            ArrayList<String> user = LoginDao.validate(enteredUsername, enteredPassword);
+            if(user != null){
+                String type = user.get(0);
+                String id = user.get(1);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                JsonObject overall = new JsonObject();
+                if(type != null && type.length() != 0 && type.equals("0")){
+                    overall.addProperty("username", enteredUsername);
+                    overall.addProperty("type", type);
+                    overall.addProperty("id", id);
+                    JsonArray arr = new JsonArray();
+                    arr.add("0");
+                    overall.add("access", arr);
+                    overall.add("employees", arr);
+                    out.println(overall);
+                }else if(type != null && type.length() != 0){
+                    ArrayList<ArrayList<String>> employeeList = LoginDao.getEmployees(enteredUsername, type);
+                    HashSet<String> accessSet = LoginDao.getAccess(enteredUsername);
+                    System.out.println(accessSet);
+                    overall.addProperty("username", enteredUsername);
+                    overall.addProperty("type", type);
+
+                    JsonArray accessArray = new JsonArray();
+                    for(String access : accessSet){
+                        accessArray.add(access);
+                    }
+                    overall.add("access", accessArray);               
+                    JsonArray employeeArray = new JsonArray();
+                    if(employeeList != null && !employeeList.isEmpty()){     
+                        for(ArrayList<String> employee : employeeList){
+
+                            String employeeString = "";
+                            for(String employeeName : employee){
+                                employeeString += employeeName + " ";
+                            }
+                            employeeString = employeeString.substring(0,employeeString.length()-1);
+                            employeeArray.add(employeeString);
+                        }
+                    }
+                    overall.add("employees", employeeArray);
+                    System.out.println(overall);
+                    out.println(overall);
+                }else{
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
+            }else{
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+}
