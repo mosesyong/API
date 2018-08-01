@@ -24,6 +24,10 @@
         <servlet-name>TransactionInputServlet</servlet-name>
         <servlet-class>Controller.TransactionInputServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>MenuRequestServlet</servlet-name>
+        <servlet-class>Controller.MenuRequestServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -47,6 +51,10 @@
     <servlet-mapping>
         <servlet-name>TransactionInputServlet</servlet-name>
         <url-pattern>/TransactionInputServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MenuRequestServlet</servlet-name>
+        <url-pattern>/MenuRequestServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
