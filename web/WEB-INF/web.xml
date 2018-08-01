@@ -21,8 +21,8 @@
         <servlet-class>Controller.EmployeeAccessServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>TransactionInput</servlet-name>
-        <servlet-class>Controller.TransactionInput</servlet-class>
+        <servlet-name>TransactionInputServlet</servlet-name>
+        <servlet-class>Controller.TransactionInputServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
@@ -45,8 +45,8 @@
         <url-pattern>/EmployeeAccessServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>TransactionInput</servlet-name>
-        <url-pattern>/TransactionInput</url-pattern>
+        <servlet-name>TransactionInputServlet</servlet-name>
+        <url-pattern>/TransactionInputServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -5,6 +5,9 @@
  */
 package Controller;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -12,11 +15,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.JsonParser;
+import java.io.BufferedReader;
+
 /**
  *
  * @author moses
  */
-public class TransactionInput extends HttpServlet {
+public class TransactionInputServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -31,9 +37,36 @@ public class TransactionInput extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String username = request.getParameter("username");
-            String dateTime = request.getParameter("dateTime");
-            //Need to receive json obj?
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            try {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
+                }
+            } finally {
+                reader.close();
+            }
+//            out.println(sb.toString());
+            
+            JsonParser parser = new JsonParser();
+            if(sb != null){
+                JsonObject jo = (JsonObject) parser.parse(sb.toString());
+                String username = jo.get("username").getAsString();
+                String dateTime = jo.get("dateTime").getAsString();
+                out.println(username);
+                out.println(dateTime);
+                JsonArray purchases = jo.get("purchases").getAsJsonArray();
+//                out.println(purchases);
+                for(JsonElement purchaseElement : purchases){
+                    JsonObject purchaseObject = purchaseElement.getAsJsonObject();
+                    String foodName = purchaseObject.get("food_name").getAsString();
+                    int quantity = purchaseObject.get("quantity").getAsInt();
+                    out.println(foodName);
+                    out.println(quantity);
+                }
+            }
+            out.println("<--End-->");
         }
     }
 

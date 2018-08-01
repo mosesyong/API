@@ -1,2 +1,4 @@
 src/java/dao/connection.properties
 build/web/WEB-INF/classes/dao/connection.properties
+nbproject/private/private.xml
+*.properties

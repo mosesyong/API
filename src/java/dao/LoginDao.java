@@ -21,7 +21,8 @@ public class LoginDao {
         ArrayList<String> result = new ArrayList<>();
         if(enteredUsername.equals("su") && enteredPassword.equals("pwd")){
             result.add("0");
-            result.add("0");
+            result.add("su");
+            result.add("Snapcoin");
             return result;
         }
         
@@ -32,12 +33,13 @@ public class LoginDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("SELECT type, Username FROM user WHERE BINARY username like '" + enteredUsername + "' and password like '" + enteredPassword + "'");
+            stmt = conn.prepareStatement("SELECT type, Username, CompanyName FROM user WHERE BINARY username like '" + enteredUsername + "' and password like '" + enteredPassword + "'");
             rs = stmt.executeQuery();
             
             while (rs.next()) {
                 result.add(rs.getString("type"));
                 result.add(rs.getString("Username"));
+                result.add(rs.getString("CompanyName"));
                 return result;
             }
             return null;

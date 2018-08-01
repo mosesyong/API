@@ -18,7 +18,8 @@ import java.util.logging.Logger;
  * @author Moses
  */
 public class CreateDao {
-    public static boolean create(String username, String password, String creator, String type, HashSet<String> accessSet){
+    
+    public static boolean create(String username, String password, String companyName, String creator, String type, HashSet<String> accessSet){
         String allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
         boolean valid = true;
         if(username.equals(password)){
@@ -34,13 +35,13 @@ public class CreateDao {
             valid = false;
         }
         if(valid){
-            return createUser(username, password, type) && createHierarchy(username, creator, type) && createAccess(username,accessSet);
+            return createUser(username, password, companyName, type) && createHierarchy(username, creator, type) && createAccess(username,accessSet);
         }else{
             return false;
         }
     }
     
-    public static boolean createUser(String username, String password, String type){
+    public static boolean createUser(String username, String password, String companyName, String type){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -65,7 +66,7 @@ public class CreateDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, Type) VALUES ('" + username + "', '" + password + "', '" + type + "');");
+            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, CompanyName, Type) VALUES ('" + username + "', '" + password + "', '" + companyName + "', '"+ type + "');");
             System.out.println(stmt);
             stmt.executeUpdate();
             

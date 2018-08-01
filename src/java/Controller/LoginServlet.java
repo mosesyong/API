@@ -43,13 +43,14 @@ public class LoginServlet extends HttpServlet {
             ArrayList<String> user = LoginDao.validate(enteredUsername, enteredPassword);
             if(user != null){
                 String type = user.get(0);
-                String id = user.get(1);
+                String username = user.get(1);
+                String companyName = user.get(2);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject overall = new JsonObject();
                 if(type != null && type.length() != 0 && type.equals("0")){
-                    overall.addProperty("username", enteredUsername);
+                    overall.addProperty("username", username);
                     overall.addProperty("type", type);
-                    overall.addProperty("id", id);
+                    overall.addProperty("companyName", companyName);
                     JsonArray arr = new JsonArray();
                     arr.add("0");
                     overall.add("access", arr);
@@ -61,6 +62,7 @@ public class LoginServlet extends HttpServlet {
                     System.out.println(accessSet);
                     overall.addProperty("username", enteredUsername);
                     overall.addProperty("type", type);
+                    overall.addProperty("companyName", companyName);
 
                     JsonArray accessArray = new JsonArray();
                     for(String access : accessSet){
