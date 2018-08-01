@@ -44,7 +44,7 @@ public class MenuRequestServlet extends HttpServlet {
                 menuItem1.addProperty("name", "chicken rice");
                 menuItem1.addProperty("price", 3.5);
                 menuItem1.addProperty("description", "Chicken rice, if you are Singaporean, you don't need a description.");
-                menuItem1.addProperty("url", "<fake chicken rice url to be inserted>");
+                menuItem1.addProperty("url", "http://localhost:8080/API/Menu_Images/test1.jpg");
                 JsonArray categoryArray = new JsonArray();
                 categoryArray.add("main");
                 categoryArray.add("rice");
