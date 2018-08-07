@@ -57,8 +57,12 @@ public class LoginServlet extends HttpServlet {
                     overall.add("employees", arr);
                     out.println(overall);
                 }else if(type != null && type.length() != 0){
-                    ArrayList<ArrayList<String>> employeeList = LoginDao.getEmployees(enteredUsername, type);
+                    String employees = LoginDao.getEmployees(enteredUsername).trim();
                     HashSet<String> accessSet = LoginDao.getAccess(enteredUsername);
+//                    if(type.equals(1)){
+//                        accessSet = new HashSet<>();
+//                        accessSet.add("0");
+//                    }
                     System.out.println(accessSet);
                     overall.addProperty("username", enteredUsername);
                     overall.addProperty("type", type);
@@ -68,20 +72,8 @@ public class LoginServlet extends HttpServlet {
                     for(String access : accessSet){
                         accessArray.add(access);
                     }
-                    overall.add("access", accessArray);               
-                    JsonArray employeeArray = new JsonArray();
-                    if(employeeList != null && !employeeList.isEmpty()){     
-                        for(ArrayList<String> employee : employeeList){
-
-                            String employeeString = "";
-                            for(String employeeName : employee){
-                                employeeString += employeeName + " ";
-                            }
-                            employeeString = employeeString.substring(0,employeeString.length()-1);
-                            employeeArray.add(employeeString);
-                        }
-                    }
-                    overall.add("employees", employeeArray);
+                    overall.add("access", accessArray);
+                    overall.addProperty("employees", employees);
                     System.out.println(overall);
                     out.println(overall);
                 }else{

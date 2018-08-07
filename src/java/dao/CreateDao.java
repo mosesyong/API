@@ -82,45 +82,15 @@ public class CreateDao {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        System.out.println("username: " + username + "\nCreator: " +  creator +  "\nType: " + type);
-        if(type.equals("2")){
-            try {
-                conn = ConnectionManager.getConnection();
+        try {
+            conn = ConnectionManager.getConnection();
 
-                stmt = conn.prepareStatement("INSERT INTO hierarchy (Admin_Name, Manager_Name) VALUES ('" + creator + "', '" + username + "');");
-                stmt.executeUpdate();
-            } catch (SQLException ex) {
-                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to create '" + username + "'", ex);
-            } finally {
-                ConnectionManager.close(conn, stmt, rs);
-            }
-        }else if(type.equals("3")){
-            String admin = "";
-            try {
-                conn = ConnectionManager.getConnection();
-
-                stmt = conn.prepareStatement("SELECT Admin_Name FROM Hierarchy WHERE Manager_Name = '" + creator + "';");
-                rs = stmt.executeQuery();
-
-                while (rs.next()) {
-                    admin = rs.getString("Admin_Name");
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve " + username + "'", ex);
-            } finally {
-                ConnectionManager.close(conn, stmt, rs);
-            }
-            
-            try {
-                conn = ConnectionManager.getConnection();
-
-                stmt = conn.prepareStatement("INSERT INTO hierarchy (Admin_Name, Manager_Name, Cashier_Name) VALUES ('" + admin + "', '" + creator + "', '" + username + "');");
-                stmt.executeUpdate();
-            } catch (SQLException ex) {
-                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to create '" + username + "'", ex);
-            } finally {
-                ConnectionManager.close(conn, stmt, rs);
-            }
+            stmt = conn.prepareStatement("INSERT INTO hierarchy (Parent, Child) VALUES ('"+ creator + "', '" + username + "');");
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to create '" + username + "'", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
         }
         return true;
     }

@@ -110,8 +110,8 @@ public class LoginDao {
         return null;
     }
     
-    public static ArrayList<ArrayList<String>> getEmployees(String username, String type){
-        ArrayList<ArrayList<String>> overallList = new ArrayList<>();
+    public static String getEmployees(String username){
+        String result = "";
         
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -120,18 +120,20 @@ public class LoginDao {
         try {
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("select Admin_Name, Manager_Name, Cashier_Name from hierarchy where Admin_Name like '" + username + "' or Manager_Name like '" + username + "';");
+            stmt = conn.prepareStatement("select child from hierarchy where Parent like '" + username + "';");
             rs = stmt.executeQuery();
             
-            while (rs.next()) {
-                ArrayList<String> employee = new ArrayList<>();
-                for(int i = Integer.parseInt(type)+1; i <= 3; i++){
-                    employee.add(rs.getString(i));
-                }
-                overallList.add(employee);
-            }
             
-            return overallList;
+            while (rs.next()) {
+                result += username + "," + getEmployees(rs.getString("child")) + " ";                
+                System.out.println(result);
+            }
+            if(result.isEmpty()){
+                return username;
+            }
+            result = result.substring(0,result.length()-1);
+            result += " ";
+            return result;
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve employees from hierarchy table", ex);
         } finally {
