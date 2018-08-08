@@ -79,4 +79,26 @@ public class UserDao {
         return false;
     }
     
+    public static String getOutlet(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select Outlet_Name from user where username = '" + username + "';");
+            
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                return rs.getString("Outlet_Name");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outletå", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
 }

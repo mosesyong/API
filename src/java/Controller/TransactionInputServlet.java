@@ -5,6 +5,8 @@
  */
 package Controller;
 
+import Entity.FoodItem;
+import Entity.Transaction;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.JsonParser;
+import dao.MenuDao;
+import dao.TransactionDao;
 import java.io.BufferedReader;
 
 /**
@@ -54,19 +58,27 @@ public class TransactionInputServlet extends HttpServlet {
                 JsonObject jo = (JsonObject) parser.parse(sb.toString());
                 String username = jo.get("username").getAsString();
                 String dateTime = jo.get("dateTime").getAsString();
-                out.println(username);
-                out.println(dateTime);
                 JsonArray purchases = jo.get("purchases").getAsJsonArray();
 //                out.println(purchases);
+                Transaction transaction = new Transaction(username, dateTime);
                 for(JsonElement purchaseElement : purchases){
                     JsonObject purchaseObject = purchaseElement.getAsJsonObject();
                     String foodName = purchaseObject.get("food_name").getAsString();
                     int quantity = purchaseObject.get("quantity").getAsInt();
-                    out.println(foodName);
-                    out.println(quantity);
+                    double price = MenuDao.getFoodPrice(username, foodName);
+                    System.out.println("Food Price: " + price);
+                    double totalPrice = quantity * price;
+                    FoodItem foodItem = new FoodItem(foodName, quantity, totalPrice);
+                    transaction.addFoodItem(foodItem);
+                }
+                double totalPrice = transaction.getTotalPrice();
+                boolean result = TransactionDao.addTransaction(transaction);
+                if(result){
+                    response.setStatus(HttpServletResponse.SC_ACCEPTED);
+                }else{
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             }
-            out.println("<--End-->");
         }
     }
 

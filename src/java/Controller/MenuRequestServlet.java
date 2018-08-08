@@ -5,12 +5,16 @@
  */
 package Controller;
 
+import Entity.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dao.MenuDao;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,38 +40,25 @@ public class MenuRequestServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             String outletName = request.getParameter("outletName");
-            if(outletName != null && outletName.equals("1")){
+            String directory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Menu_Images";
+            
+            ArrayList<MenuItem> menuItemList = MenuDao.getMenuItems(outletName);
+            
+            if(menuItemList != null && menuItemList.size() > 0){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject overall = new JsonObject();
                 JsonArray menuArray = new JsonArray();
-                JsonObject menuItem1 = new JsonObject();
-                menuItem1.addProperty("name", "chicken rice");
-                menuItem1.addProperty("price", 3.5);
-                menuItem1.addProperty("description", "Chicken rice, if you are Singaporean, you don't need a description.");
-                menuItem1.addProperty("url", "http://localhost:8080/API/Menu_Images/test1.jpg");
-                JsonArray categoryArray = new JsonArray();
-                categoryArray.add("main");
-                categoryArray.add("rice");
-                categoryArray.add("chicken");
-                categoryArray.add("singaporean");
-                menuItem1.add("category", categoryArray);
-                menuArray.add(menuItem1);
-
-                JsonObject menuItem2 = new JsonObject();
-                menuItem2.addProperty("name", "coke");
-                menuItem2.addProperty("price", 1.2);
-                menuItem2.addProperty("description", "Cock");
-                menuItem2.addProperty("url", "<fake coke url to be inserted>");
-                categoryArray = new JsonArray();
-                categoryArray.add("drink");
-                categoryArray.add("gassy drink");
-                categoryArray.add("F&N");
-                categoryArray.add("NOT SUGAR FREE");
-                menuItem2.add("category", categoryArray);
-                menuArray.add(menuItem2);
-
+                
+                for(MenuItem menuItem : menuItemList){
+                    JsonObject menuObject = new JsonObject();
+                    menuObject.addProperty("name", menuItem.itemName);
+                    menuObject.addProperty("price", menuItem.price);
+//                    menuObject.addProperty("description", "Chicken rice, if you are Singaporean, you don't need a description.");
+                    menuObject.addProperty("url", directory + File.separator + menuItem.imageName + ".jpg");
+                    menuArray.add(menuObject);
+                }
+                
                 overall.add("menu",menuArray);
-
                 out.println(overall);
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
