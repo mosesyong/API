@@ -5,6 +5,7 @@
  */
 package Controller;
 
+import dao.MenuDao;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +13,11 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +28,7 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.RequestContext;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 
 /**
  *
@@ -31,8 +36,11 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
  */
 public class AddMenuItemServlet extends HttpServlet {
     
-    private static final int MAX_MEMORY_SIZE = 1024 * 1024 * 2;
-    private static final int MAX_REQUEST_SIZE = 1024 * 1024;
+    
+    private static final int MEMORY_THRESHOLD = 1024 * 1024 * 3;
+    private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
+    private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -46,48 +54,53 @@ public class AddMenuItemServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
+            HashMap<String,String> parameterMap = new HashMap<>();
             String directory = getServletContext().getRealPath("") + "Menu_Images";
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setSizeThreshold(MEMORY_THRESHOLD);
+            
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setFileSizeMax(MAX_FILE_SIZE);
+            upload.setSizeMax(MAX_REQUEST_SIZE);
             
             boolean isMultipart = ServletFileUpload.isMultipartContent(request);
             
-            if (!isMultipart) {
-                out.println("Not multipart");
-            }else{
-                out.println("Multipart");
-                DiskFileItemFactory factory = new DiskFileItemFactory();
-                factory.setSizeThreshold(MAX_MEMORY_SIZE);
-                ServletFileUpload upload = new ServletFileUpload(factory);
-                upload.setSizeMax(MAX_REQUEST_SIZE);
-                
-                try {
-                    Part filePart = request.getPart("file"); // java.lang.IllegalStateException: Unable to process parts as no multi-part configuration has been provided
-                    InputStream filecontent = filePart.getInputStream();
-                    String filename = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                    out.println(filename);
-                    Path path = Paths.get(directory + File.separator + filename);
-                    Files.copy(filecontent, path);
-
-
-                } catch (Exception ex) {
-                    throw new ServletException(ex);
+            if(!isMultipart){
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            
+            List<FileItem> formItems = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(new ServletRequestContext(request));
+            if (formItems != null && formItems.size() > 0) {
+                for (FileItem item : formItems) {
+                    // processes only fields that are not form fields
+                    if (!item.isFormField()) {
+                        String fileName = new File(item.getName()).getName();
+                        String storedName = fileName.substring(0,fileName.indexOf('.'));
+                        String filePath = directory + File.separator + fileName;
+                        File storeFile = new File(filePath);
+                        item.write(storeFile);
+                        parameterMap.put("image",storedName);
+                    }else{
+                        String fieldName = item.getFieldName();
+                        String data = item.getString();
+                        parameterMap.put(fieldName, data);
+                    }
                 }
             }
-//            for(Part part : request.getParts()){
-//                String fileName = extractFileName(part);
-//                part.write(fileName);
-//            }
-        }
-    }
-    
-    private String extractFileName(Part part) {
-        String contentDisp = part.getHeader("content-disposition");
-        String[] items = contentDisp.split("A;");
-        for (String s : items) {
-            if (s.trim().startsWith("filename")) {
-                return s.substring(s.indexOf("=") + 2, s.length()-1);
+            
+            boolean result = MenuDao.addMenuItem(parameterMap);
+            if(result){
+                response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            }else{
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
+            
+                
+            
+        } catch (Exception ex) {
+            Logger.getLogger(AddMenuItemServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return "";
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

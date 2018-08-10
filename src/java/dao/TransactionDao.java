@@ -5,6 +5,7 @@
  */
 package dao;
 
+import Entity.AnalyticsEntity;
 import Entity.FoodItem;
 import Entity.MenuItem;
 import Entity.Transaction;
@@ -12,6 +13,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,7 +60,7 @@ public class TransactionDao {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         
-        try {// retrieves password from the database for specified username
+        try {
             conn = ConnectionManager.getConnection();
 
             String statement = "INSERT INTO purchase (Outlet_Id, TID, Food_Name, Quantity, Total_Price) VALUES";
@@ -78,4 +83,86 @@ public class TransactionDao {
         }
         return false;
     }
+    
+    public static ArrayList<AnalyticsEntity> getAnalytics(String type, String username, String outletName, String period, String analyticsType, int count){
+        ArrayList<AnalyticsEntity> result = new ArrayList<>();
+        
+        String pattern = "yyyy-MM-dd kk:mm:ss";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        Calendar cal = Calendar.getInstance();
+        String currentDate = simpleDateFormat.format(cal.getTime());
+        if(period.equals("day")){
+            cal.add(Calendar.DATE, -1);
+        }else if(period.equals("week")){
+            cal.add(Calendar.DATE, -7);
+        }else if(period.equals("month")){
+            cal.add(Calendar.MONTH, -1);
+        }else if(period.equals("year")){
+            cal.add(Calendar.YEAR, -1);
+        }
+        String startDate = simpleDateFormat.format(cal.getTime());
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        if(analyticsType.equals("sales")){
+            try {
+                conn = ConnectionManager.getConnection();
+
+                stmt = conn.prepareStatement("select SUM(Total_Price) as totalPrice from transaction where Employee_Name in (select Username from user where Outlet_Name like '" + outletName + "') and Date between '" + startDate + "' and '" + currentDate + "';");
+                System.out.println("Statement: " + stmt); 
+
+                rs = stmt.executeQuery();
+                
+                while(rs.next()){
+                    double totalPrice = rs.getDouble("totalPrice");
+                    AnalyticsEntity saleAnalytics = new AnalyticsEntity();
+                    saleAnalytics.name = period + " " + analyticsType;
+                    saleAnalytics.quantity = 1;
+                    saleAnalytics.price = totalPrice;
+                    saleAnalytics.totalPrice = totalPrice;
+                    if(totalPrice > 0){
+                        result.add(saleAnalytics);
+                    }
+                    return result;
+                }
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get analytics from'" + username + "'", ex);
+            } finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+        }else if(analyticsType.equals("items")){
+            try {
+                conn = ConnectionManager.getConnection();
+
+                stmt = conn.prepareStatement("select Food_Name, SUM(Quantity) as Quantity, SUM(Total_Price) as Total_Price from purchase where TID in (select TID from transaction where Employee_Name in (select Username from user where Outlet_Name like '" + outletName + "') and Date between '" + startDate + "' and '" + currentDate + "') group by Food_name;");
+                System.out.println("Statement: " + stmt); 
+
+                rs = stmt.executeQuery();
+                while(rs.next()){
+                    String foodName = rs.getString("Food_Name");
+                    int quantity = rs.getInt("Quantity");
+                    double totalPrice = rs.getDouble("Total_Price");
+                    AnalyticsEntity saleAnalytics = new AnalyticsEntity();
+                    saleAnalytics.name = foodName;
+                    saleAnalytics.quantity = quantity;
+                    saleAnalytics.price = totalPrice / quantity;
+                    saleAnalytics.totalPrice = totalPrice;
+                    result.add(saleAnalytics);
+                }
+                
+                return result;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get analytics from'" + username + "'", ex);
+            } finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+        }
+        
+        return result;
+    }
+    
 }

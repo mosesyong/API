@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,5 +68,60 @@ public class MenuDao {
             ConnectionManager.close(conn, stmt, rs);
         }
         return 0;
+    }
+    
+    public static boolean addMenuItem(HashMap<String,String> menuParams){
+        String name = menuParams.get("name");
+        double price = Double.parseDouble(menuParams.get("price"));
+        double cost = Double.parseDouble(menuParams.get("cost"));
+        String outletId = menuParams.get("outletId");
+        String image = menuParams.get("image");
+        
+        boolean exists = exists(name, outletId);
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            if(exists){
+                stmt = conn.prepareStatement("UPDATE menu SET image = '" + image + "', price = '" + price + "', cost = '" + cost + "', image = '" + image + "'  WHERE `menu`.`Outlet_Id` = '1' AND `menu`.`Food_Name` = 'test';");
+                stmt.executeUpdate();
+                return true;
+            }else{
+                stmt = conn.prepareStatement("insert into menu (Outlet_id, Food_Name, Price, Cost, image) values ('" + outletId + "', '" + name + "', '" + price + "', '" + cost + "', '" + image + "');");
+                stmt.executeUpdate();
+                return true;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add '" + name + "' to menu", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
+    }
+    
+    public static boolean exists(String name, String outletId){
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("Select * from menu where Outlet_Id like '" + outletId + "' and Food_Name like '" + name + "';");
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                return true;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add '" + name + "' to menu", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
     }
 }
