@@ -141,4 +141,30 @@ public class LoginDao {
         }
         return null;
     }
+    
+    public static ArrayList<String> getRoles(String companyName){
+        ArrayList<String> roleList = new ArrayList<>();
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            stmt = conn.prepareStatement("select * from roles where CompanyName like '" + companyName + "' order by Type;");
+            rs = stmt.executeQuery();
+            
+            
+            while (rs.next()) {
+                roleList.add(rs.getString("position"));
+            }
+            return roleList;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve employees from hierarchy table", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return roleList;
+    }
 }

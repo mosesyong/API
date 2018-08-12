@@ -59,6 +59,7 @@ public class LoginServlet extends HttpServlet {
                 }else if(type != null && type.length() != 0){
                     String employees = LoginDao.getEmployees(enteredUsername).trim();
                     HashSet<String> accessSet = LoginDao.getAccess(enteredUsername);
+                    ArrayList<String> roleList = LoginDao.getRoles(companyName);
 //                    if(type.equals(1)){
 //                        accessSet = new HashSet<>();
 //                        accessSet.add("0");
@@ -74,6 +75,12 @@ public class LoginServlet extends HttpServlet {
                     }
                     overall.add("access", accessArray);
                     overall.addProperty("employees", employees);
+                    
+                    JsonArray roleArray = new JsonArray();
+                    for(String role : roleList){
+                        roleArray.add(role);
+                    }
+                    overall.add("roles", roleArray);
                     System.out.println(overall);
                     out.println(overall);
                 }else{
