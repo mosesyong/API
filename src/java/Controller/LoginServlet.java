@@ -45,12 +45,14 @@ public class LoginServlet extends HttpServlet {
                 String type = user.get(0);
                 String username = user.get(1);
                 String companyName = user.get(2);
+                String outletName = user.get(3);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject overall = new JsonObject();
                 if(type != null && type.length() != 0 && type.equals("0")){
                     overall.addProperty("username", username);
                     overall.addProperty("type", type);
                     overall.addProperty("companyName", companyName);
+                    overall.addProperty("outletName", outletName);
                     JsonArray arr = new JsonArray();
                     arr.add("0");
                     overall.add("access", arr);
@@ -69,6 +71,7 @@ public class LoginServlet extends HttpServlet {
                     overall.addProperty("username", enteredUsername);
                     overall.addProperty("type", type);
                     overall.addProperty("companyName", companyName);
+                    overall.addProperty("outletName", outletName);
 
                     JsonArray accessArray = new JsonArray();
                     for(String access : accessSet){

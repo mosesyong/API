@@ -99,6 +99,8 @@ public class TransactionDao {
             cal.add(Calendar.MONTH, -1);
         }else if(period.equals("year")){
             cal.add(Calendar.YEAR, -1);
+        }else{
+            cal.add(Calendar.YEAR, -100);
         }
         String startDate = simpleDateFormat.format(cal.getTime());
         

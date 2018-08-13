@@ -33,13 +33,14 @@ public class LoginDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("SELECT type, Username, CompanyName FROM user WHERE BINARY username like '" + enteredUsername + "' and password like '" + enteredPassword + "'");
+            stmt = conn.prepareStatement("SELECT type, Username, CompanyName, Outlet_Name FROM user WHERE BINARY username like '" + enteredUsername + "' and password like '" + enteredPassword + "'");
             rs = stmt.executeQuery();
             
             while (rs.next()) {
                 result.add(rs.getString("type"));
                 result.add(rs.getString("Username"));
                 result.add(rs.getString("CompanyName"));
+                result.add(rs.getString("Outlet_Name"));
                 return result;
             }
             return null;
