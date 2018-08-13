@@ -55,6 +55,7 @@ public class LoginServlet extends HttpServlet {
                     arr.add("0");
                     overall.add("access", arr);
                     overall.add("employees", arr);
+                    overall.add("roles", arr);
                     out.println(overall);
                 }else if(type != null && type.length() != 0){
                     String employees = LoginDao.getEmployees(enteredUsername).trim();
