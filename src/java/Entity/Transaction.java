@@ -26,6 +26,13 @@ public class Transaction {
         foodList = new ArrayList<>();
     }
     
+    public Transaction(String employeeName, String dateTime, double totalPrice){
+        this.employeeName = employeeName;
+        outletName = UserDao.getOutlet(employeeName);
+        this.dateTime = dateTime;
+        this.totalPrice = totalPrice;
+    }
+    
     public void addFoodItem(FoodItem foodItem){
         foodList.add(foodItem);
     }
@@ -37,6 +44,7 @@ public class Transaction {
         }
         return totalPrice;
     }
+    
     
     @Override
     public String toString(){

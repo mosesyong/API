@@ -54,6 +54,7 @@ public class AddMenuItemServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
+            System.out.println("Enters add menu servlet");
             HashMap<String,String> parameterMap = new HashMap<>();
             String directory = getServletContext().getRealPath("") + "Menu_Images";
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -64,8 +65,7 @@ public class AddMenuItemServlet extends HttpServlet {
             upload.setSizeMax(MAX_REQUEST_SIZE);
             
             boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-            
-            System.out.println(isMultipart);
+            System.out.println("Is multipart: " + isMultipart);
             if(!isMultipart){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -89,7 +89,7 @@ public class AddMenuItemServlet extends HttpServlet {
                     }
                 }
             }
-            if(parameterMap.containsKey("image")){
+            if(parameterMap.containsKey("image") || MenuDao.exists(parameterMap.get("name"), parameterMap.get("outletId"))){
                 System.out.println("Parameter Map: " + parameterMap);
                 boolean result = MenuDao.addMenuItem(parameterMap);
                 if(result){
@@ -104,6 +104,8 @@ public class AddMenuItemServlet extends HttpServlet {
                 
             
         } catch (Exception ex) {
+            System.out.println("error: " + ex.getMessage());
+            ex.printStackTrace();
             Logger.getLogger(AddMenuItemServlet.class.getName()).log(Level.SEVERE, null, ex);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }

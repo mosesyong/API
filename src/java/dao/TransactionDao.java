@@ -127,8 +127,18 @@ public class TransactionDao {
                     if(totalPrice > 0){
                         result.add(saleAnalytics);
                     }
-                    return result;
                 }
+                System.out.println("Sales result:" + result);
+                if(result.isEmpty()){
+                    double totalPrice = 0;
+                    AnalyticsEntity saleAnalytics = new AnalyticsEntity();
+                    saleAnalytics.name = period + " " + analyticsType;
+                    saleAnalytics.quantity = 1;
+                    saleAnalytics.price = totalPrice;
+                    saleAnalytics.totalPrice = totalPrice;
+                    result.add(saleAnalytics);
+                }
+                return result;
 
             } catch (SQLException ex) {
                 Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get analytics from'" + username + "'", ex);
@@ -167,4 +177,28 @@ public class TransactionDao {
         return result;
     }
     
+    public static ArrayList<Transaction> getTransactions(String outletId){
+        ArrayList<Transaction> transactionList = new ArrayList<>();
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {// retrieves password from the database for specified username
+            conn = ConnectionManager.getConnection();
+            
+            stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where Outlet_Name = '" + outletId + "');");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                transactionList.add(new Transaction(rs.getString("Employee_Name"),rs.getString("Date"), rs.getDouble("Total_Price")));
+            }            
+            return transactionList;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletId + "'", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
 }
