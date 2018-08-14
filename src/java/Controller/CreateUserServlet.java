@@ -75,6 +75,8 @@ public class CreateUserServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST); //400
             }
             
+        }catch(Exception e){
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); //400
         }
     }
 

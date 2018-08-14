@@ -65,6 +65,7 @@ public class AddMenuItemServlet extends HttpServlet {
             
             boolean isMultipart = ServletFileUpload.isMultipartContent(request);
             
+            System.out.println(isMultipart);
             if(!isMultipart){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -88,10 +89,14 @@ public class AddMenuItemServlet extends HttpServlet {
                     }
                 }
             }
-            
-            boolean result = MenuDao.addMenuItem(parameterMap);
-            if(result){
-                response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            if(parameterMap.containsKey("image")){
+                System.out.println("Parameter Map: " + parameterMap);
+                boolean result = MenuDao.addMenuItem(parameterMap);
+                if(result){
+                    response.setStatus(HttpServletResponse.SC_ACCEPTED);
+                }else{
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
@@ -100,6 +105,7 @@ public class AddMenuItemServlet extends HttpServlet {
             
         } catch (Exception ex) {
             Logger.getLogger(AddMenuItemServlet.class.getName()).log(Level.SEVERE, null, ex);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
