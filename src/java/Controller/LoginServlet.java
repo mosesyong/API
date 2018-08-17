@@ -49,7 +49,7 @@ public class LoginServlet extends HttpServlet {
                 String type = user.get(0);
                 String username = user.get(1);
                 String companyName = user.get(2);
-                String outletName = user.get(3);
+                String outletName = LoginDao.getOutlets(username);
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject overall = new JsonObject();
                 if(type != null && type.length() != 0 && type.equals("0")){
@@ -58,7 +58,7 @@ public class LoginServlet extends HttpServlet {
                     overall.addProperty("companyName", companyName);
                     overall.addProperty("outletName", outletName);
                     JsonArray arr = new JsonArray();
-                    arr.add("0");
+                    arr.add("all");
                     overall.add("access", arr);
                     overall.add("employees", arr);
                     overall.add("roles", arr);

@@ -19,10 +19,11 @@ import java.util.logging.Logger;
  */
 public class CreateDao {
     
-    public static boolean create(String username, String password, String companyName, String creator, String type, HashSet<String> accessSet){
+    public static boolean create(String username, String password, String companyName, String outletName, String creator, String type, HashSet<String> accessSet){
         String allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
+        String allowedCharactersForNames = allowedCharacters + " ";
         boolean valid = true;
-        if(username.equals(password)){
+        if(username.length() == 0 || username.equals("admin") || username.equals(password) || outletName.equals("null") || companyName.equals("Snapcoin")){
             valid = false;
         }
         for(int i = 0; i < username.length(); i++){
@@ -31,17 +32,29 @@ public class CreateDao {
                 break;
             }
         }
+        for(int i = 0; i < companyName.length(); i++){
+            if(allowedCharactersForNames.indexOf(companyName.charAt(i)) == -1){
+                valid = false;
+                break;
+            }
+        }
+        for(int i = 0; i < outletName.length(); i++){
+            if(allowedCharactersForNames.indexOf(outletName.charAt(i)) == -1){
+                valid = false;
+                break;
+            }
+        }
         if(password.indexOf(' ') != -1){
             valid = false;
         }
         if(valid){
-            return createUser(username, password, companyName, type) && createHierarchy(username, creator, type) && createAccess(username,accessSet);
+            return createUser(username, password, companyName, outletName, type) && createHierarchy(username, creator, type) && createAccess(username,accessSet);
         }else{
             return false;
         }
     }
     
-    public static boolean createUser(String username, String password, String companyName, String type){
+    public static boolean createUser(String username, String password, String companyName, String outletName, String type){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -66,7 +79,7 @@ public class CreateDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, CompanyName, Type) VALUES ('" + username + "', '" + password + "', '" + companyName + "', '"+ type + "');");
+            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, CompanyName, Outlet_Name, Type) VALUES ('" + username + "', '" + password + "', '" + companyName + "', '" + outletName + "', '" + type + "');");
             System.out.println(stmt);
             stmt.executeUpdate();
             

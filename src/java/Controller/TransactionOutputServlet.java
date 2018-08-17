@@ -14,6 +14,7 @@ import dao.TransactionDao;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +61,9 @@ public class TransactionOutputServlet extends HttpServlet {
                 analyticsObject.addProperty("totalPrice", entity.totalPrice);
                 analyticsArr.add(analyticsObject);
             }
+            
+//            Calendar cal = Calendar.getInstance();
+//            overall.addProperty("timezone", cal.getTimeZone().getID().equals("Etc/UTC"));
             
             overall.add("result", analyticsArr);
             out.println(overall);

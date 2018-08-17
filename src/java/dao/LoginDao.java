@@ -19,9 +19,9 @@ import java.util.logging.Logger;
 public class LoginDao {
     public static ArrayList<String> validate(String enteredUsername, String enteredPassword){
         ArrayList<String> result = new ArrayList<>();
-        if(enteredUsername.equals("su") && enteredPassword.equals("pwd")){
+        if(enteredUsername.equals("admin") && enteredPassword.equals("pwd")){
             result.add("0");
-            result.add("su");
+            result.add("admin");
             result.add("Snapcoin");
             return result;
         }
@@ -137,6 +137,35 @@ public class LoginDao {
             return result;
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve employees from hierarchy table", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
+    
+    public static String getOutlets(String username){
+        String result = "";
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            stmt = conn.prepareStatement("select distinct Outlet_Name from user where username in (select child from hierarchy where parent = '" + username + "' UNION select username from user where username like '" + username + "');");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                String outletName = rs.getString("Outlet_Name");
+                result += outletName + ",";
+            }
+            result = result.substring(0,result.length()-1);
+            
+            
+            return result;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve get outlets from " + username, ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }

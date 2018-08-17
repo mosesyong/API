@@ -37,6 +37,7 @@ public class CreateUserServlet extends HttpServlet {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String companyName = request.getParameter("companyName");
+            String outletName = request.getParameter("outletName");
             String creator = request.getParameter("creator");
             String type = request.getParameter("type");
             HashSet<String> accessSet = new HashSet<>();
@@ -67,7 +68,7 @@ public class CreateUserServlet extends HttpServlet {
                 accessSet.add("refund");
             }
             
-            boolean result = CreateDao.create(username, password, companyName, creator, type, accessSet);
+            boolean result = CreateDao.create(username, password, companyName, outletName, creator, type, accessSet);
             
             if(result){
                 response.setStatus(HttpServletResponse.SC_ACCEPTED); //202

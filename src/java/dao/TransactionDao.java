@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -86,11 +87,14 @@ public class TransactionDao {
     
     public static ArrayList<AnalyticsEntity> getAnalytics(String type, String username, String outletName, String period, String analyticsType, int count){
         ArrayList<AnalyticsEntity> result = new ArrayList<>();
-        
         String pattern = "yyyy-MM-dd kk:mm:ss";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
         Calendar cal = Calendar.getInstance();
+        if(cal.getTimeZone().getID().equals("Etc/UTC")){
+            cal.add(Calendar.HOUR, 8);
+        }
         String currentDate = simpleDateFormat.format(cal.getTime());
+        System.out.println("Current date: " + currentDate);
         if(period.equals("day")){
             cal.add(Calendar.DATE, -1);
         }else if(period.equals("week")){
@@ -103,7 +107,7 @@ public class TransactionDao {
             cal.add(Calendar.YEAR, -100);
         }
         String startDate = simpleDateFormat.format(cal.getTime());
-        
+
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
