@@ -21,6 +21,11 @@ import com.google.gson.JsonParser;
 import dao.MenuDao;
 import dao.TransactionDao;
 import java.io.BufferedReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -61,7 +66,21 @@ public class TransactionInputServlet extends HttpServlet {
             if(sb != null){
                 JsonObject jo = (JsonObject) parser.parse(sb.toString());
                 String username = jo.get("username").getAsString();
-                String dateTime = jo.get("dateTime").getAsString();
+                String unformattedDateTime = jo.get("dateTime").getAsString();
+                String pattern1 = "yyyy-MM-dd hh:mm:ss a";
+                SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
+                Date date = null;
+                try {
+                   date = sdf1.parse(unformattedDateTime);
+                } catch (ParseException ex) {
+                    Logger.getLogger(TransactionInputServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new RuntimeException("Invalid date input");
+                }
+                String pattern2 = "yyyy-MM-dd HH:mm:ss";
+                SimpleDateFormat sdf2 = new SimpleDateFormat(pattern2);
+                
+                String dateTime = sdf2.format(date);
+                
                 JsonArray purchases = jo.get("purchases").getAsJsonArray();
 //                out.println(purchases);
                 Transaction transaction = new Transaction(username, dateTime);
@@ -83,6 +102,8 @@ public class TransactionInputServlet extends HttpServlet {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
             }
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
     }
 
