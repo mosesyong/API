@@ -38,7 +38,7 @@ public class TransactionDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("INSERT INTO transaction (Employee_Name, Total_Price, Date) VALUES ('" + transaction.employeeName + "', '" + transaction.totalPrice + "', '" + transaction.dateTime + "');");
+            stmt = conn.prepareStatement("INSERT INTO transaction (Employee_Name, Total_Price, Date, type) VALUES ('" + transaction.employeeName + "', '" + transaction.totalPrice + "', '" + transaction.dateTime + "', '" + transaction.type + "');");
             System.out.println("Result: " + stmt);
             stmt.executeUpdate();
             
@@ -64,10 +64,10 @@ public class TransactionDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            String statement = "INSERT INTO purchase (Outlet_Id, TID, Food_Name, Quantity, Total_Price) VALUES";
+            String statement = "INSERT INTO purchase (Outlet_Id, TID, Food_Name, Quantity, Total_Price, CompanyName) VALUES";
             
             for(FoodItem foodItem : transaction.foodList){
-                statement += ("('" + transaction.outletName + "', '" + tid + "', '" + foodItem.foodName + "', '" + foodItem.quantity + "', '" + foodItem.totalPrice + "'),");
+                statement += ("('" + transaction.outletName + "', '" + tid + "', '" + foodItem.foodName + "', '" + foodItem.quantity + "', '" + foodItem.totalPrice + "', '" + transaction.companyName + "'),");
             }
             
             statement = statement.substring(0,statement.length()-1);

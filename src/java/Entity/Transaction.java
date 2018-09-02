@@ -15,22 +15,35 @@ import java.util.ArrayList;
 public class Transaction {
     public String employeeName;
     public String outletName;
+    public String companyName;
     public double totalPrice;
     public String dateTime;
+    public String type;
     public ArrayList<FoodItem> foodList;
     
-    public Transaction(String employeeName, String dateTime){
+    public Transaction(String employeeName, String dateTime, String type){
         this.employeeName = employeeName;
         outletName = UserDao.getOutlet(employeeName);
+        companyName = UserDao.getCompanyName(employeeName);
         this.dateTime = dateTime;
         foodList = new ArrayList<>();
+        this.type = type;
     }
     
     public Transaction(String employeeName, String dateTime, double totalPrice){
         this.employeeName = employeeName;
         outletName = UserDao.getOutlet(employeeName);
+        companyName = UserDao.getCompanyName(employeeName);
         this.dateTime = dateTime;
         this.totalPrice = totalPrice;
+    }
+    
+    public Transaction(String employeeName, String dateTime, String type, double totalPrice){
+        this.employeeName = employeeName;
+        outletName = UserDao.getOutlet(employeeName);
+        this.dateTime = dateTime;
+        this.totalPrice = totalPrice;
+        this.type = type;
     }
     
     public void addFoodItem(FoodItem foodItem){

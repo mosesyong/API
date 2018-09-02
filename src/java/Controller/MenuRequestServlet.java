@@ -44,21 +44,37 @@ public class MenuRequestServlet extends HttpServlet {
         
         try (PrintWriter out = response.getWriter()) {
             String outletName = request.getParameter("outletName");
+            String companyName = request.getParameter("companyName");
             String directory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Menu_Images";
             
-            ArrayList<MenuItem> menuItemList = MenuDao.getMenuItems(outletName);
+            ArrayList<MenuItem> menuItemList = MenuDao.getMenuItems(outletName, companyName);
             
             if(menuItemList != null && menuItemList.size() > 0){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject overall = new JsonObject();
+                JsonArray categoryArray = new JsonArray();
+                
+                for(String category : MenuDao.getCategory(companyName, outletName)){
+                    categoryArray.add(category);
+                }
+                overall.add("categoryList", categoryArray);
+                
                 JsonArray menuArray = new JsonArray();
                 
                 for(MenuItem menuItem : menuItemList){
                     JsonObject menuObject = new JsonObject();
                     menuObject.addProperty("name", menuItem.itemName);
+                    menuObject.addProperty("desc", menuItem.desc);
                     menuObject.addProperty("price", menuItem.price);
+                    menuObject.addProperty("cost", menuItem.cost);
 //                    menuObject.addProperty("description", "Chicken rice, if you are Singaporean, you don't need a description.");
                     menuObject.addProperty("url", directory + File.separator + menuItem.imageName + ".jpg");
+                    JsonArray foodCategoryArray = new JsonArray();
+                    ArrayList<String> foodCategory = menuItem.categoryList;
+                    for(String category : foodCategory){
+                        foodCategoryArray.add(category);
+                    }
+                    menuObject.add("categories", foodCategoryArray);
                     menuArray.add(menuObject);
                 }
                 

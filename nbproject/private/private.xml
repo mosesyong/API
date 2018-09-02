@@ -5,6 +5,7 @@
         <group>
             <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/LoginServlet.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/TransactionInputServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Entity/MenuItem.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/TransactionListServlet.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/dao/LoginDao.java</file>
             <file>file:/Users/moses/Documents/FYP/API/web/WEB-INF/web.xml</file>

@@ -79,6 +79,29 @@ public class UserDao {
         return false;
     }
     
+    public static String getCompanyName(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select CompanyName from user where username = '" + username + "';");
+            
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                return rs.getString("CompanyName");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' company", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
+    
     public static String getOutlet(String username){
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -95,7 +118,7 @@ public class UserDao {
                 return rs.getString("Outlet_Name");
             }
         } catch (SQLException ex) {
-            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outletå", ex);
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }

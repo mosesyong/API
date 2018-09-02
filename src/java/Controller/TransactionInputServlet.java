@@ -5,6 +5,7 @@
  */
 package Controller;
 
+import dao.MenuDao;
 import Entity.FoodItem;
 import Entity.Transaction;
 import com.google.gson.JsonArray;
@@ -18,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.JsonParser;
-import dao.MenuDao;
 import dao.TransactionDao;
 import java.io.BufferedReader;
 import java.text.ParseException;
@@ -67,6 +67,7 @@ public class TransactionInputServlet extends HttpServlet {
                 JsonObject jo = (JsonObject) parser.parse(sb.toString());
                 String username = jo.get("username").getAsString();
                 String unformattedDateTime = jo.get("dateTime").getAsString();
+                String type = jo.get("type").getAsString();
                 String pattern1 = "yyyy-MM-dd hh:mm:ss a";
                 SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
                 Date date = null;
@@ -83,7 +84,7 @@ public class TransactionInputServlet extends HttpServlet {
                 
                 JsonArray purchases = jo.get("purchases").getAsJsonArray();
 //                out.println(purchases);
-                Transaction transaction = new Transaction(username, dateTime);
+                Transaction transaction = new Transaction(username, dateTime, type);
                 for(JsonElement purchaseElement : purchases){
                     JsonObject purchaseObject = purchaseElement.getAsJsonObject();
                     String foodName = purchaseObject.get("food_name").getAsString();

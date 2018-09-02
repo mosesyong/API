@@ -89,7 +89,7 @@ public class AddMenuItemServlet extends HttpServlet {
                     }
                 }
             }
-            if(parameterMap.containsKey("image") || MenuDao.exists(parameterMap.get("name"), parameterMap.get("outletId"))){
+            if(parameterMap.containsKey("image") || MenuDao.exists(parameterMap.get("name"), parameterMap.get("outletId"), parameterMap.get("companyName"))){
                 System.out.println("Parameter Map: " + parameterMap);
                 boolean result = MenuDao.addMenuItem(parameterMap);
                 if(result){

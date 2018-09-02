@@ -67,6 +67,7 @@ public class LoginServlet extends HttpServlet {
                     String employees = LoginDao.getEmployees(enteredUsername).trim();
                     HashSet<String> accessSet = LoginDao.getAccess(enteredUsername);
                     ArrayList<String> roleList = LoginDao.getRoles(companyName);
+                    ArrayList<String> categoryList = LoginDao.getCategories(companyName, outletName);
 //                    if(type.equals(1)){
 //                        accessSet = new HashSet<>();
 //                        accessSet.add("0");
@@ -89,8 +90,16 @@ public class LoginServlet extends HttpServlet {
                         roleArray.add(role);
                     }
                     overall.add("roles", roleArray);
+                    
+                    JsonArray categoryArray = new JsonArray();
+                    for(String category : categoryList){
+                        categoryArray.add(category);
+                    }
+                    overall.add("category", categoryArray);
                     System.out.println(overall);
                     out.println(overall);
+                    
+                    
                 }else{
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }

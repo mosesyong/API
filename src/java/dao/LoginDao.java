@@ -197,4 +197,30 @@ public class LoginDao {
         }
         return roleList;
     }
+    
+    public static ArrayList<String> getCategories(String companyName, String outletName){
+        ArrayList<String> categoryList = new ArrayList<>();
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            stmt = conn.prepareStatement("select Category from Category where CompanyName like '" + companyName + "' and OutletName like '" + outletName + "';");
+            rs = stmt.executeQuery();
+            
+            
+            while (rs.next()) {
+                categoryList.add(rs.getString("Category"));
+            }
+            return categoryList;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve employees from hierarchy table", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return categoryList;
+    }
 }
