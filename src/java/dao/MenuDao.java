@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -84,6 +85,9 @@ public class MenuDao {
         String image = menuParams.get("image");
         String companyName = menuParams.get("companyName");
         String desc = menuParams.get("desc");
+        String categoryStr = menuParams.get("category");
+        categoryStr = categoryStr.substring(1,categoryStr.length()-1);
+        ArrayList<String> categoryList = new ArrayList<>(Arrays.asList(categoryStr.split(",")));
         
         boolean exists = exists(name, outletId, companyName);
         
@@ -105,7 +109,8 @@ public class MenuDao {
             }
             System.out.println("menu query: " + stmt);
             stmt.executeUpdate();
-            return true;
+            
+            return addFoodCategory(companyName, outletId, name, categoryList);
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add '" + name + "' to menu", ex);
         } finally {
@@ -197,6 +202,29 @@ public class MenuDao {
             return true;
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add '" + category + "' to Category", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
+    }
+    
+    public static boolean addFoodCategory(String companyName, String outletName, String foodName, ArrayList<String> categoryList){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            for(String category : categoryList){
+                stmt = conn.prepareStatement("insert into FoodCategory (CompanyName, OutletName, FoodName, Category) values ('" + companyName + "', '" + outletName + "', '" + foodName + "', '" + category + "');");
+
+                System.out.println("category query: " + stmt);
+                stmt.executeUpdate();
+            }
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add categories for " + foodName + " to FoodCategory", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
