@@ -6,12 +6,21 @@
 package Controller;
 
 import dao.MenuDao;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 
 /**
  *
@@ -19,6 +28,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class CreateCategoryServlet extends HttpServlet {
 
+    private static final int MEMORY_THRESHOLD = 1024 * 1024 * 3;
+    private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
+    private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -31,17 +44,64 @@ public class CreateCategoryServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
         try (PrintWriter out = response.getWriter()) {
-            String category = request.getParameter("category");
-            String companyName = request.getParameter("companyName");
-            String outletName = request.getParameter("outletName");
+            HashMap<String,String> parameterMap = new HashMap<>();
+            String directory = getServletContext().getRealPath("") + "Category_Images";
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setSizeThreshold(MEMORY_THRESHOLD);
             
-            boolean result = MenuDao.addCategory(companyName, outletName, category);
-            if(result){
-                response.setStatus(HttpServletResponse.SC_ACCEPTED); //202
-            }else{
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST); //400
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setFileSizeMax(MAX_FILE_SIZE);
+            upload.setSizeMax(MAX_REQUEST_SIZE);
+            
+            boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+            System.out.println("Is multipart: " + isMultipart);
+            if(!isMultipart){
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
             }
+            
+            List<FileItem> formItems = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(new ServletRequestContext(request));
+            if (formItems != null && formItems.size() > 0) {
+                for (FileItem item : formItems) {
+                    // processes only fields that are not form fields
+                    
+                    String fieldName = item.getFieldName();
+                    String data = item.getString();
+                    parameterMap.put(fieldName, data);
+                }
+                
+                for(FileItem item : formItems){
+                    if (!item.isFormField()) {
+                        String fileName = new File(item.getName()).getName();
+                        String storedName = fileName.substring(0,fileName.indexOf('.'));
+                        String filePath = directory + File.separator + parameterMap.get("companyName") + "_" + parameterMap.get("outletName") + "_" + fileName;
+                        File storeFile = new File(filePath);
+                        item.write(storeFile);
+                        parameterMap.put("image",storedName);
+                    }
+                }
+            }
+            if(parameterMap.containsKey("image") || MenuDao.exists(parameterMap.get("name"), parameterMap.get("outletName"), parameterMap.get("companyName"))){
+                System.out.println("Parameter Map: " + parameterMap);
+                boolean result = MenuDao.addCategory(parameterMap);
+                if(result){
+                    response.setStatus(HttpServletResponse.SC_ACCEPTED);
+                }else{
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                }
+            }else{
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            
+                
+            
+        } catch (Exception ex) {
+            System.out.println("error: " + ex.getMessage());
+            ex.printStackTrace();
+            Logger.getLogger(AddMenuItemServlet.class.getName()).log(Level.SEVERE, null, ex);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 

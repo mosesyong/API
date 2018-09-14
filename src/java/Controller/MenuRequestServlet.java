@@ -5,6 +5,7 @@
  */
 package Controller;
 
+import Entity.Category;
 import Entity.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -45,17 +46,21 @@ public class MenuRequestServlet extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             String outletName = request.getParameter("outletName");
             String companyName = request.getParameter("companyName");
-            String directory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Menu_Images";
+            String menuImageDirectory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Menu_Images";
+            String categoryImageDirectory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Category_Images";
             
             ArrayList<MenuItem> menuItemList = MenuDao.getMenuItems(outletName, companyName);
             
-            if(menuItemList != null && menuItemList.size() > 0){
+            if(menuItemList != null){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonObject overall = new JsonObject();
                 JsonArray categoryArray = new JsonArray();
                 
-                for(String category : MenuDao.getCategory(companyName, outletName)){
-                    categoryArray.add(category);
+                for(Category category : MenuDao.getCategory(companyName, outletName)){
+                    JsonObject categoryObj = new JsonObject();
+                    categoryObj.addProperty("categoryName", category.categoryName);
+                    categoryObj.addProperty("url", categoryImageDirectory + File.separator + category.image + ".png");
+                    categoryArray.add(categoryObj);
                 }
                 overall.add("categoryList", categoryArray);
                 
@@ -68,7 +73,7 @@ public class MenuRequestServlet extends HttpServlet {
                     menuObject.addProperty("price", menuItem.price);
                     menuObject.addProperty("cost", menuItem.cost);
 //                    menuObject.addProperty("description", "Chicken rice, if you are Singaporean, you don't need a description.");
-                    menuObject.addProperty("url", directory + File.separator + menuItem.imageName + ".jpg");
+                    menuObject.addProperty("url", menuImageDirectory + File.separator + menuItem.imageName + ".png");
                     JsonArray foodCategoryArray = new JsonArray();
                     ArrayList<String> foodCategory = menuItem.categoryList;
                     for(String category : foodCategory){

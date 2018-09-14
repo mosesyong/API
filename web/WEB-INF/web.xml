@@ -44,6 +44,14 @@
         <servlet-name>CreateCategoryServlet</servlet-name>
         <servlet-class>Controller.CreateCategoryServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>StartDayServlet</servlet-name>
+        <servlet-class>Controller.StartDayServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StartShiftServlet</servlet-name>
+        <servlet-class>Controller.StartShiftServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -87,6 +95,14 @@
     <servlet-mapping>
         <servlet-name>CreateCategoryServlet</servlet-name>
         <url-pattern>/CreateCategoryServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StartDayServlet</servlet-name>
+        <url-pattern>/StartDayServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StartShiftServlet</servlet-name>
+        <url-pattern>/StartShiftServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

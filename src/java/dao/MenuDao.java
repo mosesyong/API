@@ -5,6 +5,7 @@
  */
 package dao;
 
+import Entity.Category;
 import Entity.MenuItem;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -105,7 +106,7 @@ public class MenuDao {
                     stmt = conn.prepareStatement("UPDATE menu SET image = '" + image + "', price = '" + price + "', cost = '" + cost + "' WHERE CompanyName = '" + companyName + "' and Outlet_Id = '" + outletId + "' AND Food_Name = '" + name + "';");
                 }
             }else{
-                stmt = conn.prepareStatement("insert into menu (CompanyName, Outlet_id, Food_Name, Price, Cost, image, Description) values ('" + companyName + "', '" + outletId + "', '" + name + "', '" + price + "', '" + cost + "', '" + image + "', '" + desc + "');");
+                stmt = conn.prepareStatement("insert into menu (CompanyName, Outlet_id, Food_Name, Price, Cost, image, Description) values ('" + companyName + "', '" + outletId + "', '" + name + "', '" + price + "', '" + cost + "', '" + companyName + "_" + outletId + "_" + image + "', '" + desc + "');");
             }
             System.out.println("menu query: " + stmt);
             stmt.executeUpdate();
@@ -141,8 +142,8 @@ public class MenuDao {
         return false;
     }
     
-    public static ArrayList<String> getCategory(String companyName, String outletName){
-        ArrayList<String> result = new ArrayList<>();
+    public static ArrayList<Category> getCategory(String companyName, String outletName){
+        ArrayList<Category> result = new ArrayList<>();
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -150,10 +151,12 @@ public class MenuDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("Select category from Category where CompanyName like '" + companyName + "' and OutletName like '" + outletName + "';");
+            stmt = conn.prepareStatement("Select category, image from Category where CompanyName like '" + companyName + "' and OutletName like '" + outletName + "';");
             rs = stmt.executeQuery();
             while(rs.next()){
-                result.add(rs.getString("category"));
+                String categoryName = rs.getString("category");
+                String image = rs.getString("image");
+                result.add(new Category(companyName, outletName, categoryName, image));
             }
             return result;
         } catch (SQLException ex) {
@@ -187,7 +190,12 @@ public class MenuDao {
         return result;
     }
     
-    public static boolean addCategory(String companyName, String outletName, String category){
+    public static boolean addCategory(HashMap<String, String> categoryParams){
+        String companyName = categoryParams.get("companyName");
+        String outletName = categoryParams.get("outletName");
+        String image = categoryParams.get("image");
+        String category = categoryParams.get("category");
+        
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -195,8 +203,8 @@ public class MenuDao {
         try {
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("insert into Category (CompanyName, OutletName, Category) values ('" + companyName + "', '" + outletName + "', '" + category + "');");
-            
+            stmt = conn.prepareStatement("insert into Category (CompanyName, OutletName, Category, image) values ('" + companyName + "', '" + outletName + "', '" + category + "', '" + companyName + "_" + outletName + "_" + image + "');");
+                
             System.out.println("category query: " + stmt);
             stmt.executeUpdate();
             return true;

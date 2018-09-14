@@ -75,17 +75,20 @@ public class AddMenuItemServlet extends HttpServlet {
             if (formItems != null && formItems.size() > 0) {
                 for (FileItem item : formItems) {
                     // processes only fields that are not form fields
+                    
+                    String fieldName = item.getFieldName();
+                    String data = item.getString();
+                    parameterMap.put(fieldName, data);
+                }
+                
+                for(FileItem item : formItems){
                     if (!item.isFormField()) {
                         String fileName = new File(item.getName()).getName();
                         String storedName = fileName.substring(0,fileName.indexOf('.'));
-                        String filePath = directory + File.separator + fileName;
+                        String filePath = directory + File.separator + parameterMap.get("companyName") + "_" + parameterMap.get("outletId") + "_" + fileName;
                         File storeFile = new File(filePath);
                         item.write(storeFile);
                         parameterMap.put("image",storedName);
-                    }else{
-                        String fieldName = item.getFieldName();
-                        String data = item.getString();
-                        parameterMap.put(fieldName, data);
                     }
                 }
             }
