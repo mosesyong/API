@@ -142,7 +142,7 @@ public class MenuDao {
         return false;
     }
     
-    public static ArrayList<Category> getCategory(String companyName, String outletName){
+    public static ArrayList<Category> getCategory(String companyName, String outletName){ //
         ArrayList<Category> result = new ArrayList<>();
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -165,6 +165,29 @@ public class MenuDao {
             ConnectionManager.close(conn, stmt, rs);
         }
         return result;
+    } 
+    
+    public static ArrayList<String> getCategories(String username){
+        ArrayList<String> result = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select Category from Category where CompanyName in (Select CompanyName from user where Username like '" + username + "') and OutletName in (Select OutletName from user where Username like '" + username + "');");
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                result.add(rs.getString("Category"));
+            }
+            return result;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get " + username + " categories", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return result;
     }
     
     public static ArrayList<String> getFoodCategory(String companyName, String outletName, String foodName){
@@ -179,7 +202,7 @@ public class MenuDao {
             stmt = conn.prepareStatement("Select category from FoodCategory where CompanyName like '" + companyName + "' and OutletName like '" + outletName + "' and FoodName like '" + foodName + "';");
             rs = stmt.executeQuery();
             while(rs.next()){
-                result.add(rs.getString("category"));
+                result.add(rs.getString("category").trim());
             }
             return result;
         } catch (SQLException ex) {

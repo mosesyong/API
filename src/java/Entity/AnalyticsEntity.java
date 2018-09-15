@@ -10,16 +10,26 @@ package Entity;
  * @author moses
  */
 public class AnalyticsEntity {
-    public String name;
+    public String paymentType;
+    public String dateTime;
+    public String foodName;
     public int quantity;
-    public double price;
     public double totalPrice;
+    public String TID;
+    public String cashierName;
     
-    public AnalyticsEntity(){
+    public AnalyticsEntity(String paymentType, String dateTime, String foodName, int quantity, double totalPrice, String TID, String cashierName){
+        this.paymentType = paymentType;
+        this.dateTime = dateTime;
+        this.foodName = foodName;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
+        this.TID = TID;
+        this.cashierName = cashierName;
     }
     
     @Override
     public String toString(){
-        return name + ", " + quantity + ", " + price + ", " + totalPrice;
+        return "foodName: " + foodName + ", paymentType: " + paymentType + ", dateTime: " + dateTime + ", quantity: " + quantity + ", total price: " + totalPrice;
     }
 }

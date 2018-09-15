@@ -38,7 +38,7 @@ public class TransactionDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("INSERT INTO transaction (Employee_Name, Total_Price, Date, type) VALUES ('" + transaction.employeeName + "', '" + transaction.totalPrice + "', '" + transaction.dateTime + "', '" + transaction.type + "');");
+            stmt = conn.prepareStatement("INSERT INTO transaction (CompanyName, OutletName, Employee_Name, Total_Price, Date, type) VALUES ('" + transaction.companyName + "', '" + transaction.outletName + "', '" + transaction.employeeName + "', '" + transaction.totalPrice + "', '" + transaction.dateTime + "', '" + transaction.type + "');");
             System.out.println("Result: " + stmt);
             stmt.executeUpdate();
             
@@ -85,105 +85,73 @@ public class TransactionDao {
         return false;
     }
     
-    public static ArrayList<AnalyticsEntity> getAnalytics(String type, String username, String outletName, String period, String analyticsType, int count){
+    public static ArrayList<AnalyticsEntity> getAnalytics(String companyName, String outletName){
         ArrayList<AnalyticsEntity> result = new ArrayList<>();
-        String pattern = "yyyy-MM-dd kk:mm:ss";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        Calendar cal = Calendar.getInstance();
-        if(cal.getTimeZone().getID().equals("Etc/UTC")){
-            cal.add(Calendar.HOUR, 8);
-        }
-        String currentDate = simpleDateFormat.format(cal.getTime());
-        System.out.println("Current date: " + currentDate);
-        if(period.equals("day")){
-            cal.add(Calendar.DATE, -1);
-        }else if(period.equals("week")){
-            cal.add(Calendar.DATE, -7);
-        }else if(period.equals("month")){
-            cal.add(Calendar.MONTH, -1);
-        }else if(period.equals("year")){
-            cal.add(Calendar.YEAR, -1);
-        }else{
-            cal.add(Calendar.YEAR, -100);
-        }
-        String startDate = simpleDateFormat.format(cal.getTime());
+//        String pattern = "yyyy-MM-dd kk:mm:ss";
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+//        Calendar cal = Calendar.getInstance();
+//        if(cal.getTimeZone().getID().equals("Etc/UTC")){
+//            cal.add(Calendar.HOUR, 8);
+//        }
+//        String currentDate = simpleDateFormat.format(cal.getTime());
+//        System.out.println("Current date: " + currentDate);
+//        if(period.equals("day")){
+//            cal.add(Calendar.DATE, -1);
+//        }else if(period.equals("week")){
+//            cal.add(Calendar.DATE, -7);
+//        }else if(period.equals("month")){
+//            cal.add(Calendar.MONTH, -1);
+//        }else if(period.equals("year")){
+//            cal.add(Calendar.YEAR, -1);
+//        }else{
+//            cal.add(Calendar.YEAR, -100);
+//        }
+//        String startDate = simpleDateFormat.format(cal.getTime());
 
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         
-        if(analyticsType.equals("sales")){
-            try {
-                conn = ConnectionManager.getConnection();
+        try {
+            conn = ConnectionManager.getConnection();
 
-                stmt = conn.prepareStatement("select SUM(Total_Price) as totalPrice from transaction where Employee_Name in (select Username from user where Outlet_Name like '" + outletName + "') and Date between '" + startDate + "' and '" + currentDate + "';");
-                System.out.println("Statement: " + stmt); 
+            stmt = conn.prepareStatement("select t.tid, t.Employee_Name, type, Date, Food_Name, p.Total_Price, quantity from transaction t, purchase p where t.tid = p.TID and t.companyName like '" + companyName + "' and t.outletName like '" + outletName + "';");
+          
+            rs = stmt.executeQuery();
 
-                rs = stmt.executeQuery();
-                
-                while(rs.next()){
-                    double totalPrice = rs.getDouble("totalPrice");
-                    AnalyticsEntity saleAnalytics = new AnalyticsEntity();
-                    saleAnalytics.name = period + " " + analyticsType;
-                    saleAnalytics.quantity = 1;
-                    saleAnalytics.price = totalPrice;
-                    saleAnalytics.totalPrice = totalPrice;
-                    if(totalPrice > 0){
-                        result.add(saleAnalytics);
-                    }
-                }
-                System.out.println("Sales result:" + result);
-                if(result.isEmpty()){
-                    double totalPrice = 0;
-                    AnalyticsEntity saleAnalytics = new AnalyticsEntity();
-                    saleAnalytics.name = period + " " + analyticsType;
-                    saleAnalytics.quantity = 1;
-                    saleAnalytics.price = totalPrice;
-                    saleAnalytics.totalPrice = totalPrice;
-                    result.add(saleAnalytics);
-                }
-                return result;
-
-            } catch (SQLException ex) {
-                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get analytics from'" + username + "'", ex);
-            } finally {
-                ConnectionManager.close(conn, stmt, rs);
+            while(rs.next()){
+                result.add(new AnalyticsEntity(rs.getString("Type"), rs.getString("Date"), rs.getString("Food_Name"), rs.getInt("quantity"), rs.getDouble("Total_Price"), rs.getString("tid"), rs.getString("Employee_Name")));
             }
-        }else if(analyticsType.equals("items")){
-            try {
-                conn = ConnectionManager.getConnection();
+            return result;
 
-                stmt = conn.prepareStatement("select Food_Name, SUM(Quantity) as Quantity, SUM(Total_Price) as Total_Price from purchase where TID in (select TID from transaction where Employee_Name in (select Username from user where Outlet_Name like '" + outletName + "') and Date between '" + startDate + "' and '" + currentDate + "') group by Food_name;");
-                System.out.println("Statement: " + stmt); 
-
-                rs = stmt.executeQuery();
-                while(rs.next()){
-                    String foodName = rs.getString("Food_Name");
-                    int quantity = rs.getInt("Quantity");
-                    double totalPrice = rs.getDouble("Total_Price");
-                    AnalyticsEntity saleAnalytics = new AnalyticsEntity();
-                    saleAnalytics.name = foodName;
-                    saleAnalytics.quantity = quantity;
-                    saleAnalytics.price = totalPrice / quantity;
-                    saleAnalytics.totalPrice = totalPrice;
-                    result.add(saleAnalytics);
-                }
-                
-                return result;
-
-            } catch (SQLException ex) {
-                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get analytics from'" + username + "'", ex);
-            } finally {
-                ConnectionManager.close(conn, stmt, rs);
-            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to get analytics from'" + companyName + " " + outletName + "'", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
         }
+        
+
         
         return result;
     }
     
-    public static ArrayList<Transaction> getTransactions(String outletId){
+    public static ArrayList<Transaction> getTransactions(String companyName, String outletName, String time){
         ArrayList<Transaction> transactionList = new ArrayList<>();
         
+        String pattern = "yyyy-MM-dd kk:mm:ss";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        Calendar cal = Calendar.getInstance();
+        if(!cal.getTimeZone().getID().equals("Asia/Singapore")){
+            cal.add(Calendar.HOUR, 8);
+        }
+        
+        if(time == null){
+            cal.add(Calendar.HOUR, -3);
+        }else{
+            cal.add(Calendar.YEAR,-100);
+        }
+        String prevDateTime = simpleDateFormat.format(cal.getTime());
+
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -191,15 +159,15 @@ public class TransactionDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where Outlet_Name = '" + outletId + "');");
+            stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and Outlet_Name = '" + outletName + "') and date >= '" + prevDateTime + "' order by Date;");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             while(rs.next()){
-                transactionList.add(new Transaction(rs.getString("Employee_Name"),rs.getString("Date"), rs.getDouble("Total_Price")));
+                transactionList.add(new Transaction(rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price")));
             }            
             return transactionList;
         } catch (SQLException ex) {
-            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletId + "'", ex);
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletName + "'", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }

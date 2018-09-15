@@ -38,8 +38,10 @@ public class TransactionListServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
+            String time = request.getParameter("time");
             String outletName = request.getParameter("outletName");
-            ArrayList<Transaction> transactionList = TransactionDao.getTransactions(outletName);
+            String companyName = request.getParameter("companyName");
+            ArrayList<Transaction> transactionList = TransactionDao.getTransactions(companyName, outletName, time);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject overall = new JsonObject();
             JsonArray transactionArray = new JsonArray();
@@ -48,6 +50,7 @@ public class TransactionListServlet extends HttpServlet {
                 transactionObject.addProperty("name", t.employeeName);
                 transactionObject.addProperty("totalPrice", t.totalPrice);
                 transactionObject.addProperty("date", t.dateTime);
+                transactionObject.addProperty("type", t.type);
                 transactionArray.add(transactionObject);
             }
             overall.add("result", transactionArray);

@@ -5,8 +5,16 @@
  */
 package Controller;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,17 +38,45 @@ public class StartShiftServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        response.addHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
+        
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet StartShiftServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet StartShiftServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            try {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
+                }
+            } finally {
+                reader.close();
+            }
+//            out.println(sb.toString());
+            
+            JsonParser parser = new JsonParser();
+            if(sb != null){
+                JsonObject jo = (JsonObject) parser.parse(sb.toString());
+                String username = jo.get("username").getAsString();
+                String unformattedDateTime = jo.get("dateTime").getAsString();
+                String type = jo.get("type").getAsString();
+                String pattern1 = "yyyy-MM-dd hh:mm:ss a";
+                SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
+                Date date = null;
+                try {
+                   date = sdf1.parse(unformattedDateTime);
+                } catch (ParseException ex) {
+                    Logger.getLogger(TransactionInputServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new RuntimeException("Invalid date input");
+                }
+                String pattern2 = "yyyy-MM-dd HH:mm:ss";
+                SimpleDateFormat sdf2 = new SimpleDateFormat(pattern2);
+                
+                String dateTime = sdf2.format(date);
+                
+                
+            }
         }
     }
 

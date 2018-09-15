@@ -11,6 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dao.TransactionDao;
+import dao.UserDao;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -39,15 +40,10 @@ public class TransactionOutputServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String type = request.getParameter("type");
-            String username = request.getParameter("username");
-            String outlet = request.getParameter("outletName");
-            String period = request.getParameter("period"); // day, week, month, year
-            String analyticsType = request.getParameter("analyticsType"); // sales, items
-            System.out.println(request.getParameter("count"));
-            int count = Integer.parseInt(request.getParameter("count")); // number of results
+            String companyName = request.getParameter("companyName");
+            String outletName = request.getParameter("outletName");
             
-            ArrayList<AnalyticsEntity> analyticsResultList = TransactionDao.getAnalytics(type, username, outlet, period, analyticsType, count);
+            ArrayList<AnalyticsEntity> analyticsResultList = TransactionDao.getAnalytics(companyName, outletName);
             
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject overall = new JsonObject();
@@ -55,10 +51,13 @@ public class TransactionOutputServlet extends HttpServlet {
             
             for(AnalyticsEntity entity : analyticsResultList){
                 JsonObject analyticsObject = new JsonObject();
-                analyticsObject.addProperty("name", entity.name);
+                analyticsObject.addProperty("foodName", entity.foodName);
                 analyticsObject.addProperty("quantity", entity.quantity);
-                analyticsObject.addProperty("unitPrice", entity.price);
                 analyticsObject.addProperty("totalPrice", entity.totalPrice);
+                analyticsObject.addProperty("paymentType", entity.paymentType);
+                analyticsObject.addProperty("dateTime", entity.dateTime);
+                analyticsObject.addProperty("TID", entity.TID);
+                analyticsObject.addProperty("cashierName", entity.cashierName);
                 analyticsArr.add(analyticsObject);
             }
             
