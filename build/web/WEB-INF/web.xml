@@ -56,6 +56,10 @@
         <servlet-name>IsAlive</servlet-name>
         <servlet-class>Controller.IsAlive</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>EditMenuItemServlet</servlet-name>
+        <servlet-class>Controller.EditMenuItemServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -111,6 +115,10 @@
     <servlet-mapping>
         <servlet-name>IsAlive</servlet-name>
         <url-pattern>/IsAlive</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditMenuItemServlet</servlet-name>
+        <url-pattern>/EditMenuItemServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
