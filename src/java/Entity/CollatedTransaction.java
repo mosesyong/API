@@ -19,4 +19,9 @@ public class CollatedTransaction {
         this.amount = amount;
         this.count = count;
     }
+    
+    @Override
+    public String toString(){
+        return("Name: " + collatedTransactionName + ", Amount: " + amount + ", Count: " + count);
+    }
 }

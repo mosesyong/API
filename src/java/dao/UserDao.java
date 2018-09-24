@@ -48,6 +48,30 @@ public class UserDao {
         return false;
     }
     
+    public static ArrayList<String> getEmployees(String username){
+        ArrayList<String> employees = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("Select Child from hierarchy where Parent = '" + username + "';");
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                employees.add(rs.getString("Child"));
+            }
+            return employees;
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return employees;
+    }
+    
     public static HashSet<String> getEmployeeAccess(String username){
         return LoginDao.getAccess(username);
     }
@@ -131,21 +155,33 @@ public class UserDao {
         return null;
     }
     
-    public static ArrayList<CollatedTransaction> toggleStart(String username, String dateTime){
-        boolean started = isStarted(username);
+    public static ArrayList<CollatedTransaction> toggleStartDay(String username, String dateTime){
+        String startTime = isStarted(username);
         
-        if(started){
-            //return data
-            return end(username, dateTime);
+        if(startTime != null){
+            return endDay(username, startTime);
         }else{
             //start
-            start(username, dateTime);  
+            updateTime(username, dateTime);  
             return null;          
         }
         
     }
     
-    public static boolean start(String username, String dateTime){
+    public static ArrayList<CollatedTransaction> toggleStartShift(String username, String dateTime){
+        String startTime = isStarted(username);
+        if(startTime != null && dayStarted(username)){
+            //end shift
+            return endShift(username, startTime);
+        }else{
+            //start shift
+            updateTime(username, dateTime);  
+            return null;          
+        }
+        
+    }
+    
+    public static boolean updateTime(String username, String dateTime){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -153,8 +189,8 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("update user set 'StartTime' = '" + dateTime + "' where username = '" + username + "';");
-            
+            stmt = conn.prepareStatement("update user set StartTime = '" + dateTime + "' where username = '" + username + "';");
+            System.out.println(stmt);
             stmt.executeUpdate();
             return true;
         } catch (SQLException ex) {
@@ -165,7 +201,53 @@ public class UserDao {
         return false;
     }
     
-    public static ArrayList<CollatedTransaction> end(String username, String dateTime){
+    public static boolean clearTime(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("update user set StartTime = null where username = '" + username + "';");
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
+    }
+    
+            
+            
+    public static ArrayList<CollatedTransaction> endDay(String username, String dateTime){
+        HashMap<String,ArrayList<String>> collatedTransactionCategoryMap = new HashMap<>();
+        ArrayList<String> employees = getEmployees(username);
+        
+        String[] paymentArray =  {"cash","card","snapcash"};
+        ArrayList<String> paymentList = new ArrayList<>(Arrays.asList(paymentArray));
+        collatedTransactionCategoryMap.put("payment", paymentList);
+        
+        ArrayList<String> categoryList = MenuDao.getCategories(username);
+        collatedTransactionCategoryMap.put("categories", categoryList); // not done yet
+        
+        ArrayList<CollatedTransaction> result = new ArrayList<>();
+        // get all categories -> all, breakdown by payment type, breakdown by category
+        
+        result.add(getAllOutletCollatedTransaction(username, dateTime));
+        
+        for(String paymentType : paymentList){
+            result.add(getOutletCollatedTransactionByPayment(username, dateTime, paymentType));
+        }
+        
+        clearTime(username);
+        
+        return result;
+    }
+    
+    public static ArrayList<CollatedTransaction> endShift(String username, String dateTime){
         HashMap<String,ArrayList<String>> collatedTransactionCategoryMap = new HashMap<>();
         
         String[] paymentArray =  {"cash","card","snapcash"};
@@ -173,18 +255,122 @@ public class UserDao {
         collatedTransactionCategoryMap.put("payment", paymentList);
         
         ArrayList<String> categoryList = MenuDao.getCategories(username);
-        collatedTransactionCategoryMap.put("categories", categoryList);
+        collatedTransactionCategoryMap.put("categories", categoryList); // not done yet
         
         ArrayList<CollatedTransaction> result = new ArrayList<>();
         // get all categories -> all, breakdown by payment type, breakdown by category
         
+        result.add(getAllCollatedTransaction(username, dateTime));
         
+        for(String paymentType : paymentList){
+            result.add(getCollatedTransactionByPayment(username, dateTime, paymentType));
+        }
+        
+        
+        clearTime(username);
         
         return result;
     }
     
-    public static CollatedTransaction getCollatedTransaction(String username, String dateTime, String categoryName, String categoryValue){
+    public static CollatedTransaction getAllCollatedTransaction(String username, String dateTime){
         CollatedTransaction collatedTransaction = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name = '" + username + "' and Date >= '" + dateTime + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                collatedTransaction = new CollatedTransaction(username + "_all_" + dateTime, rs.getDouble("total"), 1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return collatedTransaction;
+    }
+    
+    public static CollatedTransaction getCollatedTransactionByPayment(String username, String dateTime, String paymentType){
+        CollatedTransaction collatedTransaction = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name = '" + username + "' and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), 1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return collatedTransaction;
+    }
+    
+    
+    public static CollatedTransaction getAllOutletCollatedTransaction(String username, String dateTime){
+        CollatedTransaction collatedTransaction = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                collatedTransaction = new CollatedTransaction(username + "_all_" + dateTime, rs.getDouble("total"), 1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return collatedTransaction;
+    }
+    
+    public static CollatedTransaction getOutletCollatedTransactionByPayment(String username, String dateTime, String paymentType){
+        CollatedTransaction collatedTransaction = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), 1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return collatedTransaction;
+    }
+    
+    
+    public static String isStarted(String username){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -197,18 +383,22 @@ public class UserDao {
             rs = stmt.executeQuery();
             
             while(rs.next()){
-                
+                String startTime = rs.getString("StartTime");
+                if(startTime == null || startTime.length() == 0){
+                    return null;
+                }else{
+                    return startTime;
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
-        return collatedTransaction;
+        return null;
     }
     
-    
-    public static boolean isStarted(String username){
+    public static boolean dayStarted(String username){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -216,7 +406,7 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select StartTime from user where username = '" + username + "';");
+            stmt = conn.prepareStatement("select StartTime from user where username like (select Parent from hierarchy where Child = '" + username + "');");
             
             rs = stmt.executeQuery();
             
@@ -233,6 +423,7 @@ public class UserDao {
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
+        
         return false;
     }
 }

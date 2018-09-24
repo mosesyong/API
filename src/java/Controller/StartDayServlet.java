@@ -5,8 +5,20 @@
  */
 package Controller;
 
+import Entity.CollatedTransaction;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import dao.UserDao;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,11 +42,53 @@ public class StartDayServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        response.addHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
+        
         try (PrintWriter out = response.getWriter()) {
-            String companyName = request.getParameter("companyName");
-            String outletName = request.getParameter("outletName");
-            String name = request.getParameter("username");
+            String username = request.getParameter("username");
+            String unformattedDateTime = request.getParameter("dateTime");
+            String pattern1 = "yyyy-MM-dd hh:mm:ss a";
+            SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
+            Date date = null;
+            try {
+               date = sdf1.parse(unformattedDateTime);
+            } catch (ParseException ex) {
+                throw new RuntimeException("Invalid date input");
+            }
+            String pattern2 = "yyyy-MM-dd HH:mm:ss";
+            SimpleDateFormat sdf2 = new SimpleDateFormat(pattern2);
+
+            String dateTime = sdf2.format(date);
             
+            
+            ArrayList<CollatedTransaction> collatedTransactionList  = null;
+            
+            collatedTransactionList = UserDao.toggleStartDay(username, dateTime);
+            
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonObject overall = new JsonObject();
+            if(collatedTransactionList != null){
+                overall.addProperty("status", "ended");
+                JsonArray transactionArray = new JsonArray();
+                for(CollatedTransaction ct : collatedTransactionList){
+                    JsonObject transactionObj = new JsonObject();
+                    
+                    String[] nameArr = ct.collatedTransactionName.split("_");
+                    transactionObj.addProperty("name", nameArr[0]);
+                    transactionObj.addProperty("category", nameArr[1]);
+                    transactionObj.addProperty("amount", ct.amount);
+                    transactionObj.addProperty("count", ct.count);
+                    transactionArray.add(transactionObj);
+                }
+                overall.add("result", transactionArray);
+            }else{
+                overall.addProperty("status", "started/ day not started");
+                overall.addProperty("result", "Started shift/ day not started");
+            }
+            
+            out.println(overall);
             
         }
     }

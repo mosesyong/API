@@ -5,13 +5,20 @@
  */
 package Controller;
 
+import Entity.CollatedTransaction;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dao.UserDao;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,40 +50,53 @@ public class StartShiftServlet extends HttpServlet {
         response.addHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
         
         try (PrintWriter out = response.getWriter()) {
-            StringBuilder sb = new StringBuilder();
-            BufferedReader reader = request.getReader();
+            String username = request.getParameter("username");
+            String unformattedDateTime = request.getParameter("dateTime");
+            String pattern1 = "yyyy-MM-dd hh:mm:ss a";
+            SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
+            Date date = null;
             try {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append('\n');
-                }
-            } finally {
-                reader.close();
+               date = sdf1.parse(unformattedDateTime);
+            } catch (ParseException ex) {
+                throw new RuntimeException("Invalid date input");
             }
-//            out.println(sb.toString());
+            String pattern2 = "yyyy-MM-dd HH:mm:ss";
+            SimpleDateFormat sdf2 = new SimpleDateFormat(pattern2);
+
+            String dateTime = sdf2.format(date);
             
-            JsonParser parser = new JsonParser();
-            if(sb != null){
-                JsonObject jo = (JsonObject) parser.parse(sb.toString());
-                String username = jo.get("username").getAsString();
-                String unformattedDateTime = jo.get("dateTime").getAsString();
-                String type = jo.get("type").getAsString();
-                String pattern1 = "yyyy-MM-dd hh:mm:ss a";
-                SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
-                Date date = null;
-                try {
-                   date = sdf1.parse(unformattedDateTime);
-                } catch (ParseException ex) {
-                    Logger.getLogger(TransactionInputServlet.class.getName()).log(Level.SEVERE, null, ex);
-                    throw new RuntimeException("Invalid date input");
+            
+            ArrayList<CollatedTransaction> collatedTransactionList  = null;
+            
+            collatedTransactionList = UserDao.toggleStartShift(username, dateTime);
+            
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonObject overall = new JsonObject();
+            if(collatedTransactionList != null){
+                overall.addProperty("status", "ended");
+                JsonArray transactionArray = new JsonArray();
+                for(CollatedTransaction ct : collatedTransactionList){
+                    JsonObject transactionObj = new JsonObject();
+                    
+                    String[] nameArr = ct.collatedTransactionName.split("_");
+                    transactionObj.addProperty("name", nameArr[0]);
+                    transactionObj.addProperty("category", nameArr[1]);
+                    transactionObj.addProperty("amount", ct.amount);
+                    transactionObj.addProperty("count", ct.count);
+                    transactionArray.add(transactionObj);
                 }
-                String pattern2 = "yyyy-MM-dd HH:mm:ss";
-                SimpleDateFormat sdf2 = new SimpleDateFormat(pattern2);
-                
-                String dateTime = sdf2.format(date);
-                
-                
+                overall.add("result", transactionArray);
+            }else{
+                overall.addProperty("status", "started/ day not started");
+                overall.addProperty("result", "Started shift/ day not started");
             }
+            
+            out.println(overall);
+            
+                
+                
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
 
