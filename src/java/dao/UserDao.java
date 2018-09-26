@@ -155,6 +155,33 @@ public class UserDao {
         return null;
     }
     
+    public static String[] getSurcharge(String companyName, String outletName){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select gst, svc from Surcharge where companyName = '" + companyName + "' and outletName = '" + outletName + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                String[] result = {rs.getString("gst"), rs.getString("svc")};
+                for(String str : result){
+                    System.out.println(str);
+                }
+                return result;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access " + companyName + " " + outletName + " surcharge", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
+    
     public static ArrayList<CollatedTransaction> toggleStartDay(String username, String dateTime){
         String startTime = isStarted(username);
         
@@ -281,12 +308,12 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name = '" + username + "' and Date >= '" + dateTime + "';");
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total, count(Total_Price) as count from transaction where Employee_Name = '" + username + "' and Date >= '" + dateTime + "';");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             
             while(rs.next()){
-                collatedTransaction = new CollatedTransaction(username + "_all_" + dateTime, rs.getDouble("total"), 1);
+                collatedTransaction = new CollatedTransaction(username + "_all_" + dateTime, rs.getDouble("total"), rs.getInt("count"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
@@ -305,12 +332,12 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name = '" + username + "' and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total, count(Total_Price) as count from transaction where Employee_Name = '" + username + "' and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             
             while(rs.next()){
-                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), 1);
+                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), rs.getInt("count"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
@@ -330,12 +357,12 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "';");
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total, count(Total_Price) as count from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "';");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             
             while(rs.next()){
-                collatedTransaction = new CollatedTransaction(username + "_all_" + dateTime, rs.getDouble("total"), 1);
+                collatedTransaction = new CollatedTransaction(username + "_all_" + dateTime, rs.getDouble("total"), rs.getInt("count"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
@@ -354,12 +381,12 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select SUM(Total_Price) as total from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
+            stmt = conn.prepareStatement("select SUM(Total_Price) as total, count(Total_Price) as count from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             
             while(rs.next()){
-                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), 1);
+                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), rs.getInt("count"));
             }
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
@@ -426,4 +453,53 @@ public class UserDao {
         
         return false;
     }
+    
+    public static CollatedTransaction getCollatedTransactionByCategory(String username, String dateTime, String category){
+        //select quantity, total_price, category from purchase p ,FoodCategory f where tid in (select TID from transaction where date >= '2018-09-20 21:00:00' and Employee_Name = "test") and Food_Name = FoodName and category = "non-coffee"
+        CollatedTransaction collatedTransaction = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select quantity, total_price from purchase p ,FoodCategory f where tid in (select TID from transaction where date >= '" + dateTime + "'' and Employee_Name = '" + username + "') and Food_Name = FoodName and category = '" + category + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                collatedTransaction = new CollatedTransaction(username + "_" + category + "_" + dateTime, rs.getDouble("total_price"), rs.getInt("squantity"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return collatedTransaction;
+    }
+    
+//    public static CollatedTransaction getOutletCollatedTransactionByCategory(String username, String dateTime, String category){
+//        CollatedTransaction collatedTransaction = null;
+//        Connection conn = null;
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        
+//        try {
+//            conn = ConnectionManager.getConnection();
+//
+//            stmt = conn.prepareStatement("select SUM(Total_Price) as total, count(Total_Price) as count from transaction where Employee_Name in (select Child from hierarchy where Parent ='" + username + "') and Date >= '" + dateTime + "' and type = '" + paymentType + "';");
+//            System.out.println(stmt);
+//            rs = stmt.executeQuery();
+//            
+//            while(rs.next()){
+//                collatedTransaction = new CollatedTransaction(username + "_" + paymentType + "_" + dateTime, rs.getDouble("total"), rs.getInt("count"));
+//            }
+//        } catch (SQLException ex) {
+//            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+//        } finally {
+//            ConnectionManager.close(conn, stmt, rs);
+//        }
+//        return collatedTransaction;
+//    }
 }

@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dao.UserDao;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -68,21 +69,25 @@ public class LoginServlet extends HttpServlet {
                     HashSet<String> accessSet = LoginDao.getAccess(enteredUsername);
                     ArrayList<String> roleList = LoginDao.getRoles(companyName);
                     ArrayList<String> categoryList = LoginDao.getCategories(companyName, outletName);
+                    String[] surchargeArr = UserDao.getSurcharge(companyName, outletName);
 //                    if(type.equals(1)){
 //                        accessSet = new HashSet<>();
 //                        accessSet.add("0");
 //                    }
-                    System.out.println(accessSet);
                     overall.addProperty("username", enteredUsername);
                     overall.addProperty("type", type);
                     overall.addProperty("companyName", companyName);
                     overall.addProperty("outletName", outletName);
+                    overall.addProperty("gst", surchargeArr[0]);
+                    overall.addProperty("svc", surchargeArr[1]);
+
 
                     JsonArray accessArray = new JsonArray();
                     for(String access : accessSet){
                         accessArray.add(access);
                     }
                     overall.add("access", accessArray);
+                    
                     overall.addProperty("employees", employees);
                     
                     JsonArray roleArray = new JsonArray();
@@ -96,7 +101,8 @@ public class LoginServlet extends HttpServlet {
                         categoryArray.add(category);
                     }
                     overall.add("category", categoryArray);
-                    System.out.println(overall);
+                    
+                    System.out.println("Overall: " + overall);
                     out.println(overall);
                     
                     
