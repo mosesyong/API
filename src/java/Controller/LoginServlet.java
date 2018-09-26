@@ -81,7 +81,6 @@ public class LoginServlet extends HttpServlet {
                     overall.addProperty("gst", surchargeArr[0]);
                     overall.addProperty("svc", surchargeArr[1]);
 
-
                     JsonArray accessArray = new JsonArray();
                     for(String access : accessSet){
                         accessArray.add(access);
