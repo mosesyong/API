@@ -49,6 +49,30 @@ public class UserDao {
         return false;
     }
     
+    public static boolean resetPassword(String username){
+        String newPassword = "" + (int)(Math.random()*1000);
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {// retrieves password from the database for specified username
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
+            stmt.executeUpdate();
+            MailDao.sendMail(username, "Password reset request", "Your new password is " + newPassword + ". Thank you :)");
+            return true;
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
+        } catch (Exception e){
+            return false;
+        }finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
+    }
+    
     public static ArrayList<String> getEmployees(String username){
         ArrayList<String> employees = new ArrayList<>();
         Connection conn = null;
@@ -73,6 +97,27 @@ public class UserDao {
         return employees;
     }
     
+    public static String getEmail(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("Select email from user where username = '" + username + "';");
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                return rs.getString("email");
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;        
+    }
     public static HashSet<String> getEmployeeAccess(String username){
         return LoginDao.getAccess(username);
     }
