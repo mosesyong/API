@@ -84,8 +84,8 @@ public class StartDayServlet extends HttpServlet {
                 }
                 overall.add("result", transactionArray);
             }else{
-                overall.addProperty("status", "started/ day not started");
-                overall.addProperty("result", "Started shift/ day not started");
+                overall.addProperty("status", "started");
+                overall.addProperty("result", "Started day");
             }
             
             out.println(overall);

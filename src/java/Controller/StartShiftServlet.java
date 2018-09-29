@@ -6,6 +6,7 @@
 package Controller;
 
 import Entity.CollatedTransaction;
+import Exception.DayNotStartedException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -52,6 +53,10 @@ public class StartShiftServlet extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             String username = request.getParameter("username");
             String unformattedDateTime = request.getParameter("dateTime");
+            String amountStr = request.getParameter("cashbox");
+            
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonObject overall = new JsonObject();
             String pattern1 = "yyyy-MM-dd hh:mm:ss a";
             SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
             Date date = null;
@@ -68,27 +73,29 @@ public class StartShiftServlet extends HttpServlet {
             
             ArrayList<CollatedTransaction> collatedTransactionList  = null;
             
-            collatedTransactionList = UserDao.toggleStartShift(username, dateTime);
-            
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonObject overall = new JsonObject();
-            if(collatedTransactionList != null){
-                overall.addProperty("status", "ended");
-                JsonArray transactionArray = new JsonArray();
-                for(CollatedTransaction ct : collatedTransactionList){
-                    JsonObject transactionObj = new JsonObject();
-                    
-                    String[] nameArr = ct.collatedTransactionName.split("_");
-                    transactionObj.addProperty("name", nameArr[0]);
-                    transactionObj.addProperty("category", nameArr[1]);
-                    transactionObj.addProperty("amount", ct.amount);
-                    transactionObj.addProperty("count", ct.count);
-                    transactionArray.add(transactionObj);
+            try{
+                collatedTransactionList = UserDao.toggleStartShift(username, dateTime, amountStr);
+                if(collatedTransactionList != null){
+                    overall.addProperty("status", "ended");
+                    JsonArray transactionArray = new JsonArray();
+                    for(CollatedTransaction ct : collatedTransactionList){
+                        JsonObject transactionObj = new JsonObject();
+
+                        String[] nameArr = ct.collatedTransactionName.split("_");
+                        transactionObj.addProperty("name", nameArr[0]);
+                        transactionObj.addProperty("category", nameArr[1]);
+                        transactionObj.addProperty("amount", ct.amount);
+                        transactionObj.addProperty("count", ct.count);
+                        transactionArray.add(transactionObj);
+                    }
+                    overall.add("result", transactionArray);
+                }else{
+                    overall.addProperty("status", "started");
+                    overall.addProperty("result", "Started shift");
                 }
-                overall.add("result", transactionArray);
-            }else{
-                overall.addProperty("status", "started/ day not started");
-                overall.addProperty("result", "Started shift/ day not started");
+            }catch(DayNotStartedException e){
+                overall.addProperty("status", "error");
+                overall.addProperty("result", "Day not started yet");
             }
             
             out.println(overall);

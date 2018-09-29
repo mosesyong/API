@@ -7,6 +7,7 @@ package dao;
 
 import Entity.CollatedTransaction;
 import Entity.Transaction;
+import Exception.DayNotStartedException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -195,19 +196,27 @@ public class UserDao {
         
     }
     
-    public static ArrayList<CollatedTransaction> toggleStartShift(String username, String dateTime){
+    public static ArrayList<CollatedTransaction> toggleStartShift(String username, String dateTime, String amount) throws DayNotStartedException{
         String startTime = isStarted(username);
-        if(startTime != null && dayStarted(username)){
+        boolean dayStarted = dayStarted(username);
+        if(startTime != null && dayStarted && amount == null){
             //end shift
             return endShift(username, startTime);
+        }else if(dayStarted){
+            if(amount == null){
+                amount = "0";
+            }
+            updateTime(username, dateTime, amount);  
         }else{
-            //start shift
-            updateTime(username, dateTime);  
-            return null;          
+            //start shift     
+            throw new DayNotStartedException("Day not started yet");
         }
+        
+        return null;     
         
     }
     
+    // for start day
     public static boolean updateTime(String username, String dateTime){
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -228,6 +237,27 @@ public class UserDao {
         return false;
     }
     
+    // for start shift
+    public static boolean updateTime(String username, String dateTime, String amount){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("update user set StartTime = '" + dateTime + "', amount = '" + amount + "' where username = '" + username + "';");
+            System.out.println(stmt);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "'", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
+    }
+    
     public static boolean clearTime(String username){
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -236,7 +266,7 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("update user set StartTime = null where username = '" + username + "';");
+            stmt = conn.prepareStatement("update user set StartTime = null, amount = null where username = '" + username + "';");
             stmt.executeUpdate();
             return true;
         } catch (SQLException ex) {
@@ -266,7 +296,9 @@ public class UserDao {
         result.add(getAllOutletCollatedTransaction(username, dateTime));
         
         for(String paymentType : paymentList){
-            result.add(getOutletCollatedTransactionByPayment(username, dateTime, paymentType));
+            CollatedTransaction resultTransaction = getOutletCollatedTransactionByPayment(username, dateTime, paymentType);
+            
+            result.add(resultTransaction);
         }
         
         clearTime(username);
@@ -290,7 +322,16 @@ public class UserDao {
         result.add(getAllCollatedTransaction(username, dateTime));
         
         for(String paymentType : paymentList){
-            result.add(getCollatedTransactionByPayment(username, dateTime, paymentType));
+            CollatedTransaction resultTransaction = getOutletCollatedTransactionByPayment(username, dateTime, paymentType);
+            
+            result.add(resultTransaction);
+            
+            if(paymentType.equals("cash")){
+                double cashBoxAmount = getCashBoxAmount(username);
+                System.out.println("Cashbox: " + cashBoxAmount);
+                double finalCashBoxAmount = cashBoxAmount + resultTransaction.amount;
+                result.add(new CollatedTransaction(username + "_cashbox_" + dateTime, finalCashBoxAmount, 1));
+            }
         }
         
         
@@ -477,6 +518,30 @@ public class UserDao {
             ConnectionManager.close(conn, stmt, rs);
         }
         return collatedTransaction;
+    }
+    
+    public static Double getCashBoxAmount(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select amount from user where username  = '" + username + "';");
+            
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                return rs.getDouble("amount");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        
+        return null;
     }
     
 //    public static CollatedTransaction getOutletCollatedTransactionByCategory(String username, String dateTime, String category){
