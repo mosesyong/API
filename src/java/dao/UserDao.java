@@ -322,13 +322,14 @@ public class UserDao {
         result.add(getAllCollatedTransaction(username, dateTime));
         
         for(String paymentType : paymentList){
-            CollatedTransaction resultTransaction = getOutletCollatedTransactionByPayment(username, dateTime, paymentType);
+            CollatedTransaction resultTransaction = getCollatedTransactionByPayment(username, dateTime, paymentType);
             
             result.add(resultTransaction);
             
             if(paymentType.equals("cash")){
                 double cashBoxAmount = getCashBoxAmount(username);
                 System.out.println("Cashbox: " + cashBoxAmount);
+                System.out.println("Cash: " + resultTransaction.amount);
                 double finalCashBoxAmount = cashBoxAmount + resultTransaction.amount;
                 result.add(new CollatedTransaction(username + "_cashbox_" + dateTime, finalCashBoxAmount, 1));
             }
