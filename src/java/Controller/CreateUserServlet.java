@@ -6,6 +6,7 @@
 package Controller;
 
 import dao.CreateDao;
+import dao.MailDao;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -71,6 +72,8 @@ public class CreateUserServlet extends HttpServlet {
             boolean result = CreateDao.create(username, password, companyName, outletName, creator, type, accessSet);
             
             if(result){
+                //Email hardcoded to send to user:test email. Next time, add email param to request and call username of provided user
+                MailDao.sendMail("test", "Welcome " + username, "Welcome to snapcoin-pos. Your username is: " + username + " and your temporary password is: " + password + "\nThank you for signing up with us :)\nDon't forget to reset your password as soon as you log in!");
                 response.setStatus(HttpServletResponse.SC_ACCEPTED); //202
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST); //400

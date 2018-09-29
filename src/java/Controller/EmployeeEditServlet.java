@@ -16,11 +16,11 @@ public class EmployeeEditServlet extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             String employeeUsername = request.getParameter("EmployeeUsername");
             String employeeAccess = request.getParameter("EmployeeAccess");
-            String employeePassword = request.getParameter("EmployeePassword");
+            boolean resetPassword = request.getParameter("ResetPassword").equals("true");
             
             boolean passwordUpdate = true;
-            if(employeePassword != ""){
-                passwordUpdate = UserDao.changePassword(employeeUsername, employeePassword);
+            if(resetPassword){
+                passwordUpdate = UserDao.resetPassword(employeeUsername);
             }
             
             ArrayList<String> employeeAccessList = new ArrayList<>(Arrays.asList(employeeAccess.split(",")));
