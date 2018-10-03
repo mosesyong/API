@@ -33,8 +33,9 @@ public class PasswordChangeServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             String username = request.getParameter("username");
+            String oldPassword = request.getParameter("oldPassword");
             String newPassword = request.getParameter("newPassword");
-            if(UserDao.changePassword(username, newPassword)){
+            if(UserDao.changePassword(username, oldPassword, newPassword)){
                 response.setStatus(HttpServletResponse.SC_ACCEPTED);
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

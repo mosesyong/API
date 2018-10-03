@@ -26,49 +26,79 @@ import java.util.logging.Logger;
 public class UserDao {
         
         
-    public static boolean changePassword(String username, String newPassword){
+    public static boolean changePassword(String username, String oldPassword, String newPassword){
         if(newPassword.indexOf(' ') != -1 || newPassword.length() == 0){
             return false;
         }
+        
+        boolean verify = verify(username, "password", oldPassword);
+        
+        if(verify){
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+
+            try {// retrieves password from the database for specified username
+                conn = ConnectionManager.getConnection();
+
+                stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
+                stmt.executeUpdate();
+                return true;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
+            } finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+        }
+        return false;
+    }
+    
+    public static boolean verify(String username, String categoryName, String categoryValue){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        try {// retrieves password from the database for specified username
+        try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
-            stmt.executeUpdate();
-            return true;
+            stmt = conn.prepareStatement("Select username from user where username = '" + username + "' and " + categoryName + " = '" + categoryValue + "';");
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                return true;
+            }
             
         } catch (SQLException ex) {
-            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve '" + username + "' from users", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
         return false;
     }
     
-    public static boolean resetPassword(String username){
-        String newPassword = "" + (int)(Math.random()*1000);
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public static boolean resetPassword(String username, String email){
+        boolean verify = verify(username, "email", email);
+        if(verify){
+            String newPassword = "" + (int)(Math.random()*1000);
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
 
-        try {// retrieves password from the database for specified username
-            conn = ConnectionManager.getConnection();
+            try {// retrieves password from the database for specified username
+                conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
-            stmt.executeUpdate();
-            MailDao.sendMail(username, "Password reset request", "Your new password is " + newPassword + ". Thank you :)");
-            return true;
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
-        } catch (Exception e){
-            return false;
-        }finally {
-            ConnectionManager.close(conn, stmt, rs);
+                stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
+                stmt.executeUpdate();
+                MailDao.sendMail(username, "Password reset request", "Your new password is " + newPassword + ". Thank you :)");
+                return true;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to change '" + username + "' password", ex);
+            } catch (Exception e){
+                return false;
+            }finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
         }
         return false;
     }

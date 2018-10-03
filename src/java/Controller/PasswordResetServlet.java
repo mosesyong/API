@@ -33,7 +33,8 @@ public class PasswordResetServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             String username = request.getParameter("username");
-            boolean result = UserDao.resetPassword(username);
+            String email = request.getParameter("email");
+            boolean result = UserDao.resetPassword(username, email);
             
             if(result){
                 response.setStatus(HttpServletResponse.SC_ACCEPTED);
