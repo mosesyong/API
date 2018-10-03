@@ -64,6 +64,10 @@
         <servlet-name>PasswordResetServlet</servlet-name>
         <servlet-class>Controller.PasswordResetServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CopyMenuServlet</servlet-name>
+        <servlet-class>Controller.CopyMenuServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -127,6 +131,10 @@
     <servlet-mapping>
         <servlet-name>PasswordResetServlet</servlet-name>
         <url-pattern>/PasswordResetServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CopyMenuServlet</servlet-name>
+        <url-pattern>/CopyMenuServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -79,7 +79,7 @@ public class CreateDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, CompanyName, Outlet_Name, Type) VALUES ('" + username + "', '" + password + "', '" + companyName + "', '" + outletName + "', '" + type + "');");
+            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, CompanyName, outletName, Type) VALUES ('" + username + "', '" + password + "', '" + companyName + "', '" + outletName + "', '" + type + "');");
             System.out.println(stmt);
             stmt.executeUpdate();
             

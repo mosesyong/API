@@ -33,14 +33,14 @@ public class LoginDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("SELECT type, Username, CompanyName, Outlet_Name FROM user WHERE BINARY username like '" + enteredUsername + "' and password like '" + enteredPassword + "'");
+            stmt = conn.prepareStatement("SELECT type, Username, CompanyName, outletName FROM user WHERE BINARY username like '" + enteredUsername + "' and password like '" + enteredPassword + "'");
             rs = stmt.executeQuery();
             
             while (rs.next()) {
                 result.add(rs.getString("type"));
                 result.add(rs.getString("Username"));
                 result.add(rs.getString("CompanyName"));
-                result.add(rs.getString("Outlet_Name"));
+                result.add(rs.getString("outletName"));
                 return result;
             }
             return null;
@@ -153,11 +153,11 @@ public class LoginDao {
         try {
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("select distinct Outlet_Name from user where username in (select child from hierarchy where parent = '" + username + "' UNION select username from user where username like '" + username + "');");
+            stmt = conn.prepareStatement("select distinct outletName from user where username in (select child from hierarchy where parent = '" + username + "' UNION select username from user where username like '" + username + "');");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             while(rs.next()){
-                String outletName = rs.getString("Outlet_Name");
+                String outletName = rs.getString("outletName");
                 result += outletName + ",";
             }
             result = result.substring(0,result.length()-1);
@@ -222,5 +222,33 @@ public class LoginDao {
             ConnectionManager.close(conn, stmt, rs);
         }
         return categoryList;
+    }
+    
+    public static ArrayList<String> getSisterOutlets(String companyName, String outletName){
+        ArrayList<String> result = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            stmt = conn.prepareStatement("select distinct outletName from user where CompanyName like '" + companyName + "' and OutletName not like '" + outletName + "';");
+            rs = stmt.executeQuery();
+            
+            
+            while (rs.next()) {
+                String sister = rs.getString("outletName");
+                if(sister.length() > 0){
+                    result.add(sister);
+                }
+            }
+            return result;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve employees from hierarchy table", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return result;
     }
 }

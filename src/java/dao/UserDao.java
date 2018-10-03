@@ -186,12 +186,12 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select Outlet_Name from user where username = '" + username + "';");
+            stmt = conn.prepareStatement("select outletName from user where username = '" + username + "';");
             
             rs = stmt.executeQuery();
             
             while(rs.next()){
-                return rs.getString("Outlet_Name");
+                return rs.getString("outletName");
             }
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);

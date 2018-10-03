@@ -85,7 +85,7 @@ public class EditMenuItemServlet extends HttpServlet {
                     if (!item.isFormField()) {
                         String fileName = new File(item.getName()).getName();
                         String storedName = fileName.substring(0,fileName.indexOf('.'));
-                        String filePath = directory + File.separator + parameterMap.get("companyName") + "_" + parameterMap.get("outletId") + "_" + fileName;
+                        String filePath = directory + File.separator + parameterMap.get("companyName") + "_" + parameterMap.get("outletName") + "_" + fileName;
                         File storeFile = new File(filePath);
                         item.write(storeFile);
                         parameterMap.put("image",storedName);
@@ -93,7 +93,7 @@ public class EditMenuItemServlet extends HttpServlet {
                     }
                 }
             }
-            if(parameterMap.containsKey("image") || MenuDao.exists(parameterMap.get("name"), parameterMap.get("outletId"), parameterMap.get("companyName"))){
+            if(parameterMap.containsKey("image") || MenuDao.exists(parameterMap.get("name"), parameterMap.get("outletName"), parameterMap.get("companyName"))){
                 System.out.println("Parameter Map: " + parameterMap);
                 boolean result = MenuDao.editMenuItem(parameterMap);
                 if(result){

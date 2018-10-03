@@ -49,7 +49,7 @@ public class MenuRequestServlet extends HttpServlet {
             String menuImageDirectory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Menu_Images";
             String categoryImageDirectory =  request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + File.separator + "API" + File.separator + "Category_Images";
             
-            ArrayList<MenuItem> menuItemList = MenuDao.getMenuItems(outletName, companyName);
+            ArrayList<MenuItem> menuItemList = MenuDao.getMenuItems(companyName, outletName);
             
             if(menuItemList != null){
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();

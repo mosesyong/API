@@ -64,7 +64,7 @@ public class TransactionDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            String statement = "INSERT INTO purchase (Outlet_Id, TID, Food_Name, Quantity, Total_Price, CompanyName) VALUES";
+            String statement = "INSERT INTO purchase (outletName, TID, Food_Name, Quantity, Total_Price, CompanyName) VALUES";
             
             for(FoodItem foodItem : transaction.foodList){
                 statement += ("('" + transaction.outletName + "', '" + tid + "', '" + foodItem.foodName + "', '" + foodItem.quantity + "', '" + foodItem.totalPrice + "', '" + transaction.companyName + "'),");
@@ -159,7 +159,7 @@ public class TransactionDao {
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and Outlet_Name = '" + outletName + "') and date >= '" + prevDateTime + "' order by Date;");
+            stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and outletName = '" + outletName + "') and date >= '" + prevDateTime + "' order by Date;");
             System.out.println(stmt);
             rs = stmt.executeQuery();
             while(rs.next()){
