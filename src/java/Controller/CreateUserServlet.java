@@ -6,7 +6,9 @@
 package Controller;
 
 import dao.CreateDao;
+import dao.LoginDao;
 import dao.MailDao;
+import dao.UserDao;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -69,18 +71,32 @@ public class CreateUserServlet extends HttpServlet {
                 accessSet.add("refund");
             }
             
-            boolean result = CreateDao.create(username, password, companyName, outletName, creator, type, accessSet);
+            String email = request.getParameter("email");
             
+            try{
+                double gst = Double.parseDouble(request.getParameter("gst"))/100;
+                double svc = Double.parseDouble(request.getParameter("svc"))/100;
+
+                UserDao.setSurcharge(gst, svc, companyName, outletName);
+            }catch(Exception e){
+                e.printStackTrace();
+                System.out.println("No gst and svc sent");
+            }
+            
+            boolean result = CreateDao.create(username, password, email, companyName, outletName, creator, type, accessSet);
+            System.out.println("Create " + username + " result: " + result);
             if(result){
                 //Email hardcoded to send to user:test email. Next time, add email param to request and call username of provided user
-                MailDao.sendMail("test", "Welcome " + username, "Welcome to snapcoin-pos. Your username is: " + username + " and your temporary password is: " + password + "\nThank you for signing up with us :)\nDon't forget to reset your password as soon as you log in!");
+                MailDao.sendMail(username, "Welcome " + username, "Welcome to snapcoin-pos. Your username is: " + username + " and your temporary password is: " + password + "\nThank you for signing up with us :)\nDon't forget to reset your password as soon as you log in!");
                 response.setStatus(HttpServletResponse.SC_ACCEPTED); //202
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST); //400
             }
             
         }catch(Exception e){
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST); //400
+            return;
         }
     }
 

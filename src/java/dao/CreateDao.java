@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class CreateDao {
     
-    public static boolean create(String username, String password, String companyName, String outletName, String creator, String type, HashSet<String> accessSet){
+    public static boolean create(String username, String password, String email, String companyName, String outletName, String creator, String type, HashSet<String> accessSet){
         String allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
         String allowedCharactersForNames = allowedCharacters + " ";
         boolean valid = true;
@@ -48,13 +48,13 @@ public class CreateDao {
             valid = false;
         }
         if(valid){
-            return createUser(username, password, companyName, outletName, type) && createHierarchy(username, creator, type) && createAccess(username,accessSet);
+            return createUser(username, password, email, companyName, outletName, type) && createHierarchy(username, creator, type) && createAccess(username,accessSet);
         }else{
             return false;
         }
     }
     
-    public static boolean createUser(String username, String password, String companyName, String outletName, String type){
+    public static boolean createUser(String username, String password, String email, String companyName, String outletName, String type){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -79,7 +79,7 @@ public class CreateDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, CompanyName, outletName, Type) VALUES ('" + username + "', '" + password + "', '" + companyName + "', '" + outletName + "', '" + type + "');");
+            stmt = conn.prepareStatement("INSERT INTO USER (Username, Password, email, CompanyName, outletName, Type) VALUES ('" + username + "', '" + password + "', '" + email + "', '" + companyName + "', '" + outletName + "', '" + type + "');");
             System.out.println(stmt);
             stmt.executeUpdate();
             

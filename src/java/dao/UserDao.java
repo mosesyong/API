@@ -89,7 +89,7 @@ public class UserDao {
 
                 stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
                 stmt.executeUpdate();
-                MailDao.sendMail(username, "Password reset request", "Your new password is " + newPassword + ". Thank you :)");
+                MailDao.sendMail(username, "Password reset request", "Hello " + username + "\nYour new password is " + newPassword + "\nDon't forget to reset your password as soon as you log in!\nThank you :)");
                 return true;
 
             } catch (SQLException ex) {
@@ -100,6 +100,57 @@ public class UserDao {
                 ConnectionManager.close(conn, stmt, rs);
             }
         }
+        return false;
+    }
+    
+    public static boolean setSurcharge(Double gst, double svc, String companyName, String outletName){
+        if(!checkSurcharge(companyName, outletName)){
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+
+            try {
+                conn = ConnectionManager.getConnection();
+
+                stmt = conn.prepareStatement("Insert into surcharge(companyName, outletName, gst,svc) values('" + companyName + "','" + outletName + "', '" + gst + "', '" + svc + "');");
+                stmt.executeUpdate();
+                return true;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add '" + gst + " & " + svc + "' to " + companyName + "_" + outletName, ex);
+            } catch (Exception e){
+                return false;
+            }finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+        }
+        return false;
+    }
+    
+    public static boolean checkSurcharge(String companyName, String outletName){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select * from surcharge where companyName = '" + companyName + "' and outletName = '" + outletName +"';");
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                return true;
+            }
+            return false;
+
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve surcharge from " + companyName + "_" + outletName, ex);
+        } catch (Exception e){
+            return false;
+        }finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        
         return false;
     }
     
@@ -255,7 +306,8 @@ public class UserDao {
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
-        return null;
+        String[] defaultSurcharge = {"0.07", "0.1"};
+        return defaultSurcharge;
     }
     
     public static ArrayList<CollatedTransaction> toggleStartDay(String username, String dateTime){
