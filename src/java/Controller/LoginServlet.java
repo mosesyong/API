@@ -83,6 +83,10 @@ public class LoginServlet extends HttpServlet {
                     overall.addProperty("outletName", outletName);
                     overall.addProperty("gst", surchargeArr[0]);
                     overall.addProperty("svc", surchargeArr[1]);
+                    
+                    String started = UserDao.isStarted(username);
+                    boolean isStarted = started != null;
+                    overall.addProperty("started", isStarted);
 
                     JsonArray accessArray = new JsonArray();
                     for(String access : accessSet){

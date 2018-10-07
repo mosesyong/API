@@ -319,7 +319,7 @@ public class MenuDao {
         try {
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("insert into Category (CompanyName, OutletName, Category, image) values ('" + companyName + "', '" + outletName + "', '" + categoryName + "', '" + image + "');");
+            stmt = conn.prepareStatement("insert into Category (CompanyName, OutletName, Category, image) values ('" + companyName + "', '" + outletName + "', '" + categoryName + "', '" + companyName + "_" + outletName + "_" + image + "');");
                 
             System.out.println("category query: " + stmt);
             stmt.executeUpdate();

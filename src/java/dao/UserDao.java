@@ -89,7 +89,7 @@ public class UserDao {
 
                 stmt = conn.prepareStatement("UPDATE user SET Password = '" + newPassword + "' WHERE Username = '" + username + "';");
                 stmt.executeUpdate();
-                MailDao.sendMail(username, "Password reset request", "Hello " + username + "\nYour new password is " + newPassword + "\nDon't forget to reset your password as soon as you log in!\nThank you :)");
+                MailDao.sendMail(username, "Password reset request - " + username, "Hello " + username + "\nYour new password is " + newPassword + "\nDon't forget to reset your password as soon as you log in!\nThank you :)");
                 return true;
 
             } catch (SQLException ex) {
