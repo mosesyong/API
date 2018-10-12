@@ -293,7 +293,7 @@ public class MenuDao {
         try {
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("insert into Category (CompanyName, OutletName, Category, image) values ('" + companyName + "', '" + outletName + "', '" + categoryName + "', '" + companyName + "_" + outletName + "_" + image + "');");
+            stmt = conn.prepareStatement("insert into Category (CompanyName, OutletName, Category, image) values ('" + companyName + "', '" + outletName + "', '" + categoryName + "', '" + image + "');");
                 
             System.out.println("category query: " + stmt);
             stmt.executeUpdate();
@@ -395,7 +395,7 @@ public class MenuDao {
     
     public static boolean copyCategory(String companyName, String outletName, String sourceOutletName, boolean append){
         ArrayList<Category> categoryNames = getCategory(companyName, sourceOutletName);
-        
+        System.out.println(categoryNames);
         if(!append){
             clearTable("category", companyName, outletName);
         }

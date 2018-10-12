@@ -16,18 +16,22 @@ public class Transaction {
     public String employeeName;
     public String outletName;
     public String companyName;
+    public boolean dineIn;
+    public double recievedTotal;
     public double totalPrice;
     public String dateTime;
     public String type;
     public ArrayList<FoodItem> foodList;
     
-    public Transaction(String employeeName, String dateTime, String type){
+    public Transaction(String employeeName, String dateTime, String type, double receivedTotal, boolean dineIn){
         this.employeeName = employeeName;
         outletName = UserDao.getOutlet(employeeName);
         companyName = UserDao.getCompanyName(employeeName);
         this.dateTime = dateTime;
         foodList = new ArrayList<>();
         this.type = type;
+        this.recievedTotal = receivedTotal;
+        this.dineIn = dineIn;
     }
     
     public Transaction(String employeeName, String dateTime, double totalPrice){

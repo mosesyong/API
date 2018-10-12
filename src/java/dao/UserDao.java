@@ -410,6 +410,7 @@ public class UserDao {
         HashMap<String,ArrayList<String>> collatedTransactionCategoryMap = new HashMap<>();
         ArrayList<String> employees = getEmployees(username);
         
+        
         String[] paymentArray =  {"cash","card","snapcash"};
         ArrayList<String> paymentList = new ArrayList<>(Arrays.asList(paymentArray));
         collatedTransactionCategoryMap.put("payment", paymentList);
@@ -458,7 +459,7 @@ public class UserDao {
                 System.out.println("Cashbox: " + cashBoxAmount);
                 System.out.println("Cash: " + resultTransaction.amount);
                 double finalCashBoxAmount = cashBoxAmount + resultTransaction.amount;
-                result.add(new CollatedTransaction(username + "_cashbox_" + dateTime, finalCashBoxAmount, 1));
+                result.add(new CollatedTransaction(username + "_cashbox_" + dateTime, finalCashBoxAmount, 0));
             }
         }
         

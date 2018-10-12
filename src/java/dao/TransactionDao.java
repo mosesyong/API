@@ -37,8 +37,14 @@ public class TransactionDao {
         
         try {// retrieves password from the database for specified username
             conn = ConnectionManager.getConnection();
+            
+            boolean dineIn = transaction.dineIn;
+            String dineInStr = "0x01";
+            if(!dineIn){
+                dineInStr = "0x00";
+            }
 
-            stmt = conn.prepareStatement("INSERT INTO transaction (CompanyName, OutletName, Employee_Name, Total_Price, Date, type) VALUES ('" + transaction.companyName + "', '" + transaction.outletName + "', '" + transaction.employeeName + "', '" + transaction.totalPrice + "', '" + transaction.dateTime + "', '" + transaction.type + "');");
+            stmt = conn.prepareStatement("INSERT INTO transaction (CompanyName, OutletName, Employee_Name, Total_Price, Date, type, DineIn) VALUES ('" + transaction.companyName + "', '" + transaction.outletName + "', '" + transaction.employeeName + "', '" + transaction.recievedTotal + "', '" + transaction.dateTime + "', '" + transaction.type + "', " + dineInStr + ");");
             System.out.println("Result: " + stmt);
             stmt.executeUpdate();
             

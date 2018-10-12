@@ -65,6 +65,10 @@ public class TransactionInputServlet extends HttpServlet {
             JsonParser parser = new JsonParser();
             if(sb != null){
                 JsonObject jo = (JsonObject) parser.parse(sb.toString());
+                
+                String transactionType = jo.get("transactionType").getAsString();
+                boolean dineIn = transactionType.equals("dinein");
+                Double recievedTotal = jo.get("total").getAsDouble();
                 String username = jo.get("username").getAsString();
                 String unformattedDateTime = jo.get("dateTime").getAsString();
                 String type = jo.get("type").getAsString();
@@ -84,7 +88,7 @@ public class TransactionInputServlet extends HttpServlet {
                 
                 JsonArray purchases = jo.get("purchases").getAsJsonArray();
 //                out.println(purchases);
-                Transaction transaction = new Transaction(username, dateTime, type);
+                Transaction transaction = new Transaction(username, dateTime, type, recievedTotal, dineIn);
                 for(JsonElement purchaseElement : purchases){
                     JsonObject purchaseObject = purchaseElement.getAsJsonObject();
                     String foodName = purchaseObject.get("food_name").getAsString();
