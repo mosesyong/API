@@ -5,8 +5,6 @@
  */
 package Controller;
 
-import Entity.Transaction;
-import Exception.DayNotStartedException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -14,9 +12,9 @@ import com.google.gson.JsonObject;
 import dao.TransactionDao;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author moses
  */
-public class TransactionListServlet extends HttpServlet {
+public class RefundServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -41,37 +39,28 @@ public class TransactionListServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String time = request.getParameter("time");
-            String outletName = request.getParameter("outletName");
-            String companyName = request.getParameter("companyName");
+            String transactionId = request.getParameter("transactionId");
             String username = request.getParameter("username");
-            ArrayList<Transaction> transactionList;
+            
+            String unformattedDateTime = request.getParameter("dateTime");
+            String pattern1 = "yyyy-MM-dd hh:mm:ss a";
+            SimpleDateFormat sdf1 = new SimpleDateFormat(pattern1);
+            Date date = null;
+            try {
+               date = sdf1.parse(unformattedDateTime);
+            } catch (ParseException ex) {
+                throw new RuntimeException("Invalid date input");
+            }
+            String pattern2 = "yyyy-MM-dd HH:mm:ss";
+            SimpleDateFormat sdf2 = new SimpleDateFormat(pattern2);
+
+            String dateTime = sdf2.format(date);
+            
+            boolean result = TransactionDao.refundTransaction(username, transactionId, dateTime);
             
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject overall = new JsonObject();
-            
-            try {
-                transactionList = TransactionDao.getTransactions(companyName, outletName, username, time);
-                JsonArray transactionArray = new JsonArray();
-                for(Transaction t: transactionList){
-                    JsonObject transactionObject = new JsonObject();
-                    transactionObject.addProperty("id", t.transactionId);
-                    transactionObject.addProperty("name", t.employeeName);
-                    transactionObject.addProperty("totalPrice", t.totalPrice);
-                    transactionObject.addProperty("date", t.dateTime);
-                    transactionObject.addProperty("type", t.type);
-                    transactionObject.addProperty("refunded", t.refunded);
-                    transactionObject.addProperty("refundedBy", t.refundedBy);
-                    transactionObject.addProperty("refundedDate", t.refundedDate);
-                    
-                    transactionArray.add(transactionObject);
-                }
-            overall.add("result", transactionArray);
-            } catch (DayNotStartedException ex) {
-                overall.addProperty("error", ex.getMessage());
-            }
-            
-            
+            overall.addProperty("result", result);
             out.println(overall);
         }
     }

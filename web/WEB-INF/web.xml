@@ -80,6 +80,22 @@
         <servlet-name>UpdateEmployeeServlet</servlet-name>
         <servlet-class>Controller.UpdateEmployeeServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>RefundServlet</servlet-name>
+        <servlet-class>Controller.RefundServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateDiscountServlet</servlet-name>
+        <servlet-class>Controller.CreateDiscountServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EditDiscountServlet</servlet-name>
+        <servlet-class>Controller.EditDiscountServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DiscountListServlet</servlet-name>
+        <servlet-class>Controller.DiscountListServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -159,6 +175,22 @@
     <servlet-mapping>
         <servlet-name>UpdateEmployeeServlet</servlet-name>
         <url-pattern>/UpdateEmployeeServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RefundServlet</servlet-name>
+        <url-pattern>/RefundServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateDiscountServlet</servlet-name>
+        <url-pattern>/CreateDiscountServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditDiscountServlet</servlet-name>
+        <url-pattern>/EditDiscountServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DiscountListServlet</servlet-name>
+        <url-pattern>/DiscountListServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

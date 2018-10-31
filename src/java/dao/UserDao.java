@@ -584,7 +584,7 @@ public class UserDao {
                 if(startTime == null || startTime.length() == 0){
                     return null;
                 }else{
-                    return startTime;
+                    return startTime.substring(0,startTime.length()-2);
                 }
             }
         } catch (SQLException ex) {

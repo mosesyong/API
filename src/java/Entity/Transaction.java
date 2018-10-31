@@ -13,6 +13,7 @@ import java.util.ArrayList;
  * @author moses
  */
 public class Transaction {
+    public String transactionId;
     public String employeeName;
     public String outletName;
     public String companyName;
@@ -22,6 +23,9 @@ public class Transaction {
     public String dateTime;
     public String type;
     public ArrayList<FoodItem> foodList;
+    public boolean refunded;
+    public String refundedBy = null;
+    public String refundedDate = null;
     
     public Transaction(String employeeName, String dateTime, String type, double receivedTotal, boolean dineIn){
         this.employeeName = employeeName;
@@ -42,12 +46,18 @@ public class Transaction {
         this.totalPrice = totalPrice;
     }
     
-    public Transaction(String employeeName, String dateTime, String type, double totalPrice){
+    public Transaction(String transactionId, String employeeName, String dateTime, String type, double totalPrice, String refund){
+        this.transactionId = transactionId;
         this.employeeName = employeeName;
         outletName = UserDao.getOutlet(employeeName);
         this.dateTime = dateTime;
         this.totalPrice = totalPrice;
         this.type = type;
+        if(refund.equals("1")){
+            this.refunded = true;
+        }else{
+            this.refunded = false;
+        }
     }
     
     public void addFoodItem(FoodItem foodItem){

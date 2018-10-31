@@ -9,6 +9,7 @@ import Entity.AnalyticsEntity;
 import Entity.FoodItem;
 import Entity.MenuItem;
 import Entity.Transaction;
+import Exception.DayNotStartedException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -126,7 +127,11 @@ public class TransactionDao {
             rs = stmt.executeQuery();
 
             while(rs.next()){
-                result.add(new AnalyticsEntity(rs.getString("Type"), rs.getString("Date"), rs.getString("Food_Name"), rs.getInt("quantity"), rs.getDouble("Total_Price"), rs.getString("tid"), rs.getString("Employee_Name")));
+                AnalyticsEntity entity = new AnalyticsEntity(rs.getString("Type"), rs.getString("Date"), rs.getString("Food_Name"), rs.getInt("quantity"), rs.getDouble("Total_Price"), rs.getString("tid"), rs.getString("Employee_Name"));
+                if(rs.getString("refunded").equals("1")){
+                    entity.refunded = true;
+                }
+                result.add(entity);
             }
             return result;
 
@@ -141,7 +146,7 @@ public class TransactionDao {
         return result;
     }
     
-    public static ArrayList<Transaction> getTransactions(String companyName, String outletName, String time){
+    public static ArrayList<Transaction> getTransactions(String companyName, String outletName, String username, String timeStr) throws DayNotStartedException{
         ArrayList<Transaction> transactionList = new ArrayList<>();
         
         String pattern = "yyyy-MM-dd kk:mm:ss";
@@ -151,32 +156,115 @@ public class TransactionDao {
             cal.add(Calendar.HOUR, 8);
         }
         
-        if(time == null){
-            cal.add(Calendar.HOUR, -3);
-        }else{
-            cal.add(Calendar.YEAR,-100);
-        }
-        String prevDateTime = simpleDateFormat.format(cal.getTime());
+        if(username == null && timeStr != null){
+            int time = Integer.parseInt(timeStr);
+            cal.add(Calendar.HOUR,-time);
+            String prevDateTime = simpleDateFormat.format(cal.getTime());
 
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+
+            try {// retrieves password from the database for specified username
+                conn = ConnectionManager.getConnection();
+
+                stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and outletName = '" + outletName + "') and date >= '" + prevDateTime + "' order by Date;");
+                System.out.println(stmt);
+                rs = stmt.executeQuery();
+                while(rs.next()){
+                    Transaction t = new Transaction(rs.getString("TID"), rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price"), rs.getString("Refunded"));
+                    if(t.refunded){
+                        t.refundedBy = rs.getString("refundedBy");
+                        t.refundedDate = rs.getString("dateRefunded");
+                    }
+                    transactionList.add(t);                
+                }              
+                return transactionList;
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletName + "'", ex);
+            } finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+            return null;
+        }else if(username == null && timeStr == null){
+            cal.add(Calendar.HOUR,-3);
+            String prevDateTime = simpleDateFormat.format(cal.getTime());
+
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+
+            try {// retrieves password from the database for specified username
+                conn = ConnectionManager.getConnection();
+
+                stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and outletName = '" + outletName + "') and date >= '" + prevDateTime + "' order by Date;");
+                System.out.println(stmt);
+                rs = stmt.executeQuery();
+                while(rs.next()){
+                    Transaction t = new Transaction(rs.getString("TID"), rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price"), rs.getString("Refunded"));
+                    if(t.refunded){
+                        t.refundedBy = rs.getString("refundedBy");
+                        t.refundedDate = rs.getString("dateRefunded");
+                    }
+                    transactionList.add(t);                
+                }           
+                return transactionList;
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletName + "'", ex);
+            } finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+            return null;
+        }else{
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+
+            try {// retrieves password from the database for specified username
+                conn = ConnectionManager.getConnection();
+                
+                String dateTime = UserDao.isStarted(username);
+                if(dateTime == null){
+                    throw new DayNotStartedException("Day/Shift not started");
+                }
+                stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and outletName = '" + outletName + "') and Employee_Name in (select child from hierarchy where parent like '" + username + "' UNION select username from user where username = '" + username + "') and date >= '" + dateTime + "' order by Date;");
+                
+                System.out.println(stmt);
+                rs = stmt.executeQuery();
+                while(rs.next()){
+                    Transaction t = new Transaction(rs.getString("TID"), rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price"), rs.getString("Refunded"));
+                    if(t.refunded){
+                        t.refundedBy = rs.getString("refundedBy");
+                        t.refundedDate = rs.getString("dateRefunded");
+                    }
+                    transactionList.add(t);
+                }            
+                return transactionList;
+            } catch (SQLException ex) {
+                Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletName + "'", ex);
+            } finally {
+                ConnectionManager.close(conn, stmt, rs);
+            }
+            return null;
+        }
+    }
+    
+    public static boolean refundTransaction(String username, String transactionId, String dateTime){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         
-        try {// retrieves password from the database for specified username
+        try {
             conn = ConnectionManager.getConnection();
             
-            stmt = conn.prepareStatement("select * from transaction where Employee_Name in (select Username from user where CompanyName = '" + companyName + "' and outletName = '" + outletName + "') and date >= '" + prevDateTime + "' order by Date;");
-            System.out.println(stmt);
-            rs = stmt.executeQuery();
-            while(rs.next()){
-                transactionList.add(new Transaction(rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price")));
-            }            
-            return transactionList;
+            stmt = conn.prepareStatement("update transaction SET Refunded = 1, refundedBy = '" + username + "', dateRefunded = '" + dateTime + "' where TID = '" + transactionId + "';");
+            stmt.executeUpdate(); 
+            return true;
         } catch (SQLException ex) {
-            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + outletName + "'", ex);
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction from'" + transactionId + "'", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
-        return null;
+        return false;
     }
 }

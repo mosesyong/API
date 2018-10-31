@@ -17,6 +17,7 @@ public class AnalyticsEntity {
     public double totalPrice;
     public String TID;
     public String cashierName;
+    public boolean refunded = false;
     
     public AnalyticsEntity(String paymentType, String dateTime, String foodName, int quantity, double totalPrice, String TID, String cashierName){
         this.paymentType = paymentType;
@@ -30,6 +31,6 @@ public class AnalyticsEntity {
     
     @Override
     public String toString(){
-        return "foodName: " + foodName + ", paymentType: " + paymentType + ", dateTime: " + dateTime + ", quantity: " + quantity + ", total price: " + totalPrice;
+        return "foodName: " + foodName + ", paymentType: " + paymentType + ", dateTime: " + dateTime + ", quantity: " + quantity + ", total price: " + totalPrice + ", refunded: " + refunded;
     }
 }

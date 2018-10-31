@@ -5,18 +5,8 @@
  */
 package Controller;
 
-import Entity.Transaction;
-import Exception.DayNotStartedException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import dao.TransactionDao;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author moses
  */
-public class TransactionListServlet extends HttpServlet {
+public class EditDiscountServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -41,38 +31,16 @@ public class TransactionListServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String time = request.getParameter("time");
-            String outletName = request.getParameter("outletName");
-            String companyName = request.getParameter("companyName");
-            String username = request.getParameter("username");
-            ArrayList<Transaction> transactionList;
-            
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonObject overall = new JsonObject();
-            
-            try {
-                transactionList = TransactionDao.getTransactions(companyName, outletName, username, time);
-                JsonArray transactionArray = new JsonArray();
-                for(Transaction t: transactionList){
-                    JsonObject transactionObject = new JsonObject();
-                    transactionObject.addProperty("id", t.transactionId);
-                    transactionObject.addProperty("name", t.employeeName);
-                    transactionObject.addProperty("totalPrice", t.totalPrice);
-                    transactionObject.addProperty("date", t.dateTime);
-                    transactionObject.addProperty("type", t.type);
-                    transactionObject.addProperty("refunded", t.refunded);
-                    transactionObject.addProperty("refundedBy", t.refundedBy);
-                    transactionObject.addProperty("refundedDate", t.refundedDate);
-                    
-                    transactionArray.add(transactionObject);
-                }
-            overall.add("result", transactionArray);
-            } catch (DayNotStartedException ex) {
-                overall.addProperty("error", ex.getMessage());
-            }
-            
-            
-            out.println(overall);
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet EditDiscountServlet</title>");            
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet EditDiscountServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
         }
     }
 
