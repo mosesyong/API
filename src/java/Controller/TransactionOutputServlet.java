@@ -57,6 +57,7 @@ public class TransactionOutputServlet extends HttpServlet {
                 analyticsObject.addProperty("paymentType", entity.paymentType);
                 analyticsObject.addProperty("dateTime", entity.dateTime);
                 analyticsObject.addProperty("TID", entity.TID);
+                analyticsObject.addProperty("discountName", entity.discountName);
                 analyticsObject.addProperty("cashierName", entity.cashierName);
                 analyticsObject.addProperty("refunded", entity.refunded);
                 analyticsArr.add(analyticsObject);

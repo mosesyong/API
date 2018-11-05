@@ -18,5 +18,7 @@ public class Discount {
     public Discount(String name, String companyName, String outletName, double discountPercentage){
         this.name = name;
         this.discountPercentage = discountPercentage;
+        this.companyName = companyName;
+        this.outletName = outletName;
     }
 }

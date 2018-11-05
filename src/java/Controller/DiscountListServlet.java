@@ -5,8 +5,15 @@
  */
 package Controller;
 
+import Entity.Discount;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import dao.DiscountDao;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,16 +38,25 @@ public class DiscountListServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet DiscountListServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet DiscountListServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+            String companyName = request.getParameter("companyName");
+            String outletName = request.getParameter("outletName");
+            
+            
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonObject overall = new JsonObject();
+            JsonArray discountArray = new JsonArray();
+            
+            ArrayList<Discount> discountList = DiscountDao.getDiscounts(companyName, outletName);
+            if(discountList != null){
+                for(Discount d : discountList){
+                    JsonObject discountObj = new JsonObject();
+                    discountObj.addProperty("discountName", d.name);
+                    discountObj.addProperty("discountPercentage", d.discountPercentage);
+                    discountArray.add(discountObj);
+                }
+            }
+            overall.add("discount", discountArray);
+            out.println(overall);
         }
     }
 

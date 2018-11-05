@@ -3,8 +3,21 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/dao/DiscountDao.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/AddDiscountServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/dao/MenuDao.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/CreateDiscountServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/MenuRequestServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/TransactionInputServlet.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/TransactionListServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Entity/Discount.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/DiscountListServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/EditDiscountServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/dao/LoginDao.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/Entity/AnalyticsEntity.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/RefundServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/AddMenuItemServlet.java</file>
+            <file>file:/Users/moses/Documents/FYP/API/src/java/Entity/Transaction.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/Controller/TransactionOutputServlet.java</file>
             <file>file:/Users/moses/Documents/FYP/API/src/java/dao/TransactionDao.java</file>
         </group>

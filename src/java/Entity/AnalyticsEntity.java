@@ -16,16 +16,18 @@ public class AnalyticsEntity {
     public int quantity;
     public double totalPrice;
     public String TID;
+    public String discountName;
     public String cashierName;
     public boolean refunded = false;
     
-    public AnalyticsEntity(String paymentType, String dateTime, String foodName, int quantity, double totalPrice, String TID, String cashierName){
+    public AnalyticsEntity(String paymentType, String dateTime, String foodName, int quantity, double totalPrice, String TID, String discountName, String cashierName){
         this.paymentType = paymentType;
         this.dateTime = dateTime;
         this.foodName = foodName;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
         this.TID = TID;
+        this.discountName = discountName;
         this.cashierName = cashierName;
     }
     

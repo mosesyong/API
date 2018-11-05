@@ -45,7 +45,7 @@ public class TransactionDao {
                 dineInStr = "0x00";
             }
 
-            stmt = conn.prepareStatement("INSERT INTO transaction (CompanyName, OutletName, Employee_Name, Total_Price, Date, type, DineIn) VALUES ('" + transaction.companyName + "', '" + transaction.outletName + "', '" + transaction.employeeName + "', '" + transaction.recievedTotal + "', '" + transaction.dateTime + "', '" + transaction.type + "', " + dineInStr + ");");
+            stmt = conn.prepareStatement("INSERT INTO transaction (CompanyName, OutletName, Employee_Name, Total_Price, Discount_Name, Date, type, DineIn) VALUES ('" + transaction.companyName + "', '" + transaction.outletName + "', '" + transaction.employeeName + "', '" + transaction.recievedTotal + "', '" + transaction.discountName + "', '" + transaction.dateTime + "', '" + transaction.type + "', " + dineInStr + ");");
             System.out.println("Result: " + stmt);
             stmt.executeUpdate();
             
@@ -122,12 +122,12 @@ public class TransactionDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select t.tid, t.Employee_Name, type, Date, Food_Name, p.Total_Price, quantity from transaction t, purchase p where t.tid = p.TID and t.companyName like '" + companyName + "' and t.outletName like '" + outletName + "';");
+            stmt = conn.prepareStatement("select t.tid, t.Employee_Name, type, Date, Food_Name, Discount_Name, p.Total_Price, quantity from transaction t, purchase p where t.tid = p.TID and t.companyName like '" + companyName + "' and t.outletName like '" + outletName + "';");
           
             rs = stmt.executeQuery();
 
             while(rs.next()){
-                AnalyticsEntity entity = new AnalyticsEntity(rs.getString("Type"), rs.getString("Date"), rs.getString("Food_Name"), rs.getInt("quantity"), rs.getDouble("Total_Price"), rs.getString("tid"), rs.getString("Employee_Name"));
+                AnalyticsEntity entity = new AnalyticsEntity(rs.getString("Type"), rs.getString("Date"), rs.getString("Food_Name"), rs.getInt("quantity"), rs.getDouble("Total_Price"), rs.getString("tid"), rs.getString("Discount_Name"), rs.getString("Employee_Name"));
                 if(rs.getString("refunded").equals("1")){
                     entity.refunded = true;
                 }

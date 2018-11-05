@@ -96,6 +96,10 @@
         <servlet-name>DiscountListServlet</servlet-name>
         <servlet-class>Controller.DiscountListServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AddDiscountServlet</servlet-name>
+        <servlet-class>Controller.AddDiscountServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -191,6 +195,10 @@
     <servlet-mapping>
         <servlet-name>DiscountListServlet</servlet-name>
         <url-pattern>/DiscountListServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddDiscountServlet</servlet-name>
+        <url-pattern>/AddDiscountServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -68,6 +68,13 @@ public class TransactionInputServlet extends HttpServlet {
                 
                 String transactionType = jo.get("transactionType").getAsString();
                 boolean dineIn = transactionType.equals("dinein");
+                JsonElement discountNameElement = jo.get("discount");
+                String discountName;
+                if(discountNameElement == null){
+                    discountName = "null";
+                }else{
+                    discountName = discountNameElement.getAsString();
+                }
                 Double recievedTotal = jo.get("total").getAsDouble();
                 String username = jo.get("username").getAsString();
                 String unformattedDateTime = jo.get("dateTime").getAsString();
@@ -88,7 +95,7 @@ public class TransactionInputServlet extends HttpServlet {
                 
                 JsonArray purchases = jo.get("purchases").getAsJsonArray();
 //                out.println(purchases);
-                Transaction transaction = new Transaction(username, dateTime, type, recievedTotal, dineIn);
+                Transaction transaction = new Transaction(username, dateTime, type, recievedTotal, dineIn, discountName);
                 for(JsonElement purchaseElement : purchases){
                     JsonObject purchaseObject = purchaseElement.getAsJsonObject();
                     String foodName = purchaseObject.get("food_name").getAsString();
@@ -109,6 +116,7 @@ public class TransactionInputServlet extends HttpServlet {
             }
         }catch(Exception e){
             System.out.println(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 

@@ -26,8 +26,9 @@ public class Transaction {
     public boolean refunded;
     public String refundedBy = null;
     public String refundedDate = null;
+    public String discountName;
     
-    public Transaction(String employeeName, String dateTime, String type, double receivedTotal, boolean dineIn){
+    public Transaction(String employeeName, String dateTime, String type, double receivedTotal, boolean dineIn, String discountName){
         this.employeeName = employeeName;
         outletName = UserDao.getOutlet(employeeName);
         companyName = UserDao.getCompanyName(employeeName);
@@ -36,6 +37,7 @@ public class Transaction {
         this.type = type;
         this.recievedTotal = receivedTotal;
         this.dineIn = dineIn;
+        this.discountName = discountName;
     }
     
     public Transaction(String employeeName, String dateTime, double totalPrice){

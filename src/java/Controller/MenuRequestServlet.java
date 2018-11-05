@@ -6,11 +6,13 @@
 package Controller;
 
 import Entity.Category;
+import Entity.Discount;
 import Entity.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dao.DiscountDao;
 import dao.MenuDao;
 import java.io.File;
 import java.io.IOException;
@@ -84,7 +86,21 @@ public class MenuRequestServlet extends HttpServlet {
                 }
                 
                 overall.add("menu",menuArray);
-                out.println(overall);
+                
+                JsonArray discountArray = new JsonArray();
+            
+            ArrayList<Discount> discountList = DiscountDao.getDiscounts(companyName, outletName);
+            if(discountList != null){
+                for(Discount d : discountList){
+                    JsonObject discountObj = new JsonObject();
+                    discountObj.addProperty("discountName", d.name);
+                    discountObj.addProperty("discountPercentage", d.discountPercentage);
+                    discountArray.add(discountObj);
+                }
+            }
+            overall.add("discount", discountArray);
+            
+            out.println(overall);
             }else{
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
