@@ -21,4 +21,9 @@ public class Discount {
         this.companyName = companyName;
         this.outletName = outletName;
     }
+    
+    public Discount(String name, double discountPercentage){
+        this.name = name;
+        this.discountPercentage = discountPercentage;
+    }
 }

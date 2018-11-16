@@ -42,7 +42,10 @@ public class CreateUserServlet extends HttpServlet {
             String companyName = request.getParameter("companyName");
             String outletName = request.getParameter("outletName");
             String creator = request.getParameter("creator");
+            String subCreator = request.getParameter("subCreator");
             String type = request.getParameter("type");
+            
+            boolean directlyCreating = subCreator == null;
             HashSet<String> accessSet = new HashSet<>();
             String menuRights = request.getParameter("menuRights");
             if(menuRights.equals("1")){
@@ -83,6 +86,10 @@ public class CreateUserServlet extends HttpServlet {
                 System.out.println("No gst and svc sent");
             }
             
+            if(directlyCreating){
+                creator = subCreator;
+                type = "" + (Integer.parseInt(type) + 1);
+            }
             boolean result = CreateDao.create(username, password, email, companyName, outletName, creator, type, accessSet);
             System.out.println("Create " + username + " result: " + result);
             if(result){

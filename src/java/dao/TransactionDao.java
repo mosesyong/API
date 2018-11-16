@@ -267,4 +267,54 @@ public class TransactionDao {
         }
         return false;
     }
+    
+    public static boolean moveTransaction(String username){
+        String parent = UserDao.getParent(username);
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = ConnectionManager.getConnection();
+            
+            stmt = conn.prepareStatement("update transaction SET Employee_Name = '" + parent + "' where Employee_Name = '" + username + "';");
+            stmt.executeUpdate(); 
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to remove transactions from'" + username + "'", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return false;
+    }
+    
+    public static ArrayList<Transaction> getAllTransactions(){
+        ArrayList<Transaction> transactionList = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            stmt = conn.prepareStatement("select * from transaction;");
+
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                Transaction t = new Transaction(rs.getString("TID"), rs.getString("companyName"), rs.getString("outletName"), rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price"), rs.getString("Refunded"), rs.getString("Discount_Name"), rs.getString("DineIn").equals("0x01"));
+                if(t.refunded){
+                    t.refundedBy = rs.getString("refundedBy");
+                    t.refundedDate = rs.getString("dateRefunded");
+                }
+                transactionList.add(t);
+            }            
+            return transactionList;
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction for snapcoin admin", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
 }

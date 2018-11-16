@@ -6,6 +6,11 @@
 package dao;
 
 import Entity.Discount;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +18,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.http.HttpEntity;
+
+
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 /**
  *
@@ -71,6 +84,32 @@ public class DiscountDao {
             ConnectionManager.close(conn, stmt, rs);
         }
         
+        return null;
+    }
+    
+    public static Discount getSnapcoinDiscount(){
+        try {
+            HttpHost target = new HttpHost("18.217.167.135", 80, "http"); // change ip if necessary
+            
+            DefaultHttpClient httpclient = new DefaultHttpClient();
+            HttpPost postRequest = new HttpPost("/SnapcoinAPI/SnapcashPromotionAPI");
+            HttpResponse httpResponse = httpclient.execute(target, postRequest);
+            HttpEntity entity = httpResponse.getEntity();
+            JsonParser parser = new JsonParser();
+            JsonObject jo = (JsonObject) parser.parse(EntityUtils.toString(entity));
+            double snapcoinDiscountAmount = jo.get("Snapcoin_Discount").getAsDouble();
+            Discount snapcoinDiscount = new Discount("Snapcoin Discount", snapcoinDiscountAmount);
+            
+            
+            return snapcoinDiscount;       
+            
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Logger.getLogger(DiscountDao.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         return null;
     }
     

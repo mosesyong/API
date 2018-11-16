@@ -673,6 +673,73 @@ public class UserDao {
         return null;
     }
     
+    public static boolean deleteUser(String username, String companyName, String outletName){
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("update user set deleted = 0x01 , where username = '" + username + "' and companyName = '" + companyName + "' and outletName = '" + outletName + "';");
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+            return false;
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        
+        
+        return TransactionDao.moveTransaction(username) && removeFromHierarchy(username);
+    }
+    
+    public static String getParent(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("select Parent from user where child  = '" + username + "';");
+            
+            rs = stmt.executeQuery();
+            
+            while(rs.next()){
+                return rs.getString("Parent");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        
+        return null;
+    }
+    
+    public static boolean removeFromHierarchy(String username){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("delete from hierarchy where child  = '" + username + "';");
+            
+            stmt.executeUpdate();    
+            return true;        
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        
+        return false;
+    }
+    
 //    public static CollatedTransaction getOutletCollatedTransactionByCategory(String username, String dateTime, String category){
 //        CollatedTransaction collatedTransaction = null;
 //        Connection conn = null;

@@ -100,6 +100,30 @@
         <servlet-name>AddDiscountServlet</servlet-name>
         <servlet-class>Controller.AddDiscountServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AddReservationServlet</servlet-name>
+        <servlet-class>Controller.AddReservationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReservationRequestServlet</servlet-name>
+        <servlet-class>Controller.ReservationRequestServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateReservationServlet</servlet-name>
+        <servlet-class>Controller.UpdateReservationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RecieptMailServlet</servlet-name>
+        <servlet-class>Controller.RecieptMailServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <servlet-class>Controller.DeleteUserServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DisplaySnapcashAnalytics</servlet-name>
+        <servlet-class>Controller.DisplaySnapcashAnalytics</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -199,6 +223,30 @@
     <servlet-mapping>
         <servlet-name>AddDiscountServlet</servlet-name>
         <url-pattern>/AddDiscountServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddReservationServlet</servlet-name>
+        <url-pattern>/AddReservationServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReservationRequestServlet</servlet-name>
+        <url-pattern>/ReservationRequestServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateReservationServlet</servlet-name>
+        <url-pattern>/UpdateReservationServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RecieptMailServlet</servlet-name>
+        <url-pattern>/RecieptMailServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <url-pattern>/DeleteUserServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DisplaySnapcashAnalytics</servlet-name>
+        <url-pattern>/DisplaySnapcashAnalytics</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

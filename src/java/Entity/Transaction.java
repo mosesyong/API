@@ -62,6 +62,23 @@ public class Transaction {
         }
     }
     
+    public Transaction(String transactionId, String companyName, String outletName, String employeeName, String dateTime, String type, double totalPrice, String refund, String discountName, boolean dineIn){
+        this.transactionId = transactionId;
+        this.companyName = companyName;
+        this.outletName = outletName;
+        this.employeeName = employeeName;
+        this.dateTime = dateTime;
+        this.totalPrice = totalPrice;
+        this.type = type;
+        this.discountName = discountName;
+        this.dineIn = dineIn;
+        if(refund.equals("1")){
+            this.refunded = true;
+        }else{
+            this.refunded = false;
+        }
+    }
+    
     public void addFoodItem(FoodItem foodItem){
         foodList.add(foodItem);
     }

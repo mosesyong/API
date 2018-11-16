@@ -41,12 +41,19 @@ public class DiscountListServlet extends HttpServlet {
             String companyName = request.getParameter("companyName");
             String outletName = request.getParameter("outletName");
             
-            
+            System.out.println(companyName + ", " + outletName);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonObject overall = new JsonObject();
             JsonArray discountArray = new JsonArray();
             
             ArrayList<Discount> discountList = DiscountDao.getDiscounts(companyName, outletName);
+            
+            Discount snapcoinDiscount = DiscountDao.getSnapcoinDiscount();
+          
+            if(snapcoinDiscount != null){
+               discountList.add(snapcoinDiscount);
+            }            
+            
             if(discountList != null){
                 for(Discount d : discountList){
                     JsonObject discountObj = new JsonObject();
@@ -56,6 +63,7 @@ public class DiscountListServlet extends HttpServlet {
                 }
             }
             overall.add("discount", discountArray);
+            System.out.println("Discounts: " + overall);
             out.println(overall);
         }
     }
