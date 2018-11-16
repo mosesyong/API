@@ -5,7 +5,11 @@
  */
 package Controller;
 
+import Entity.FoodItem;
+import Entity.Transaction;
+import dao.DiscountDao;
 import dao.MailDao;
+import dao.TransactionDao;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -36,10 +40,26 @@ public class RecieptMailServlet extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             String email = request.getParameter("email");
             String name = request.getParameter("name");
-            String amount = request.getParameter("totalAmount");
+            String subtotal = request.getParameter("subtotal");
+            String id = request.getParameter("id");
             
-            String subject = "E-reciept for " + name;
-            String message = "Thank you for your purchase of $" + amount + "\nWe hope to see you again :)";
+            Transaction t = TransactionDao.getTransaction(id);
+            
+            String subject = "E-reciept from " + t.companyName + "@" + t.outletName;
+            String message = "Issued to: " + name + "\nDate: " + t.dateTime + "\n\n";
+            message += "Items:\n";
+            for(FoodItem f : t.foodList){
+                message += f.quantity + " x " + f.foodName + " ($" + f.totalPrice + ")\n";
+            }
+            message += "\nSubtotal: $" + subtotal + "\n";
+            if(t.discountName.equals("null")){
+                message += "\nDiscount: None\n"; 
+            }else{
+                message += "\nDiscount: " + t.discountName + " (" + DiscountDao.getDiscountAmount(t.companyName, t.outletName, t.discountName)*100 + "%)\n";
+            }
+            message += "Total: $" + t.totalPrice + "\n\n";
+            message += "Thank you for your purchase!\nSee you again :)";
+            
             try{
                 MailDao.sendCustomMail(email, subject, message);
                 out.println("{status:\"success\"}");

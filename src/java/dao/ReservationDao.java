@@ -56,8 +56,9 @@ public class ReservationDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("SELECT * FROM reservation WHERE CompanyName like '" + companyName + "' and outletName like '" + outletName + "' and dateTime > (select startTime from user where username = '" + username + "');" );
-            
+            stmt = conn.prepareStatement("SELECT * FROM reservation WHERE CompanyName like '" + companyName + "' and outletName like '" + outletName + "' and dateTime > (select startTime from user where username = '" + username + "') order by dateTime;" );
+//            System.out.println("Reservation");
+//            System.out.println(stmt);
             rs = stmt.executeQuery();
             
             while (rs.next()) {

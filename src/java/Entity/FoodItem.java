@@ -20,6 +20,11 @@ public class FoodItem {
         this.totalPrice = totalPrice;
     }
     
+    public FoodItem(String foodName, int quantity){
+        this.foodName = foodName;
+        this.quantity = quantity;
+    }
+    
     @Override
     public String toString(){
         return (foodName + ", " + quantity + ", " + totalPrice);

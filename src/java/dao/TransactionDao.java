@@ -30,7 +30,7 @@ public class TransactionDao {
     //INSERT INTO `transaction` (`TID`, `Employee_Name`, `Total_Cost`, `Date`) VALUES (NULL, 'Cashier1', '10.0', '2018-07-31 11:01:04');
     //SELECT last_insert_id()
     
-    public static boolean addTransaction(Transaction transaction){
+    public static int addTransaction(Transaction transaction){
         System.out.println(transaction);
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -60,10 +60,10 @@ public class TransactionDao {
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
-        return false;
+        return 0;
     }
     
-    public static boolean addPurchase(Transaction transaction, int tid){
+    public static int addPurchase(Transaction transaction, int tid){
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -82,14 +82,14 @@ public class TransactionDao {
             
             stmt.executeUpdate();
             
-            return true;
+            return tid;
             
         } catch (SQLException ex) {
             Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to add transaction from'" + transaction.employeeName + "'", ex);
         } finally {
             ConnectionManager.close(conn, stmt, rs);
         }
-        return false;
+        return 0;
     }
     
     public static ArrayList<AnalyticsEntity> getAnalytics(String companyName, String outletName){
@@ -316,5 +316,54 @@ public class TransactionDao {
             ConnectionManager.close(conn, stmt, rs);
         }
         return null;
+    }
+    
+    public static Transaction getTransaction(String id){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            stmt = conn.prepareStatement("select * from transaction where tid = '" + id + "';");
+
+//            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                Transaction t = new Transaction(rs.getString("TID"), rs.getString("companyName"), rs.getString("outletName"), rs.getString("Employee_Name"),rs.getString("Date"), rs.getString("Type"), rs.getDouble("Total_Price"), rs.getString("Refunded"), rs.getString("Discount_Name"), rs.getString("DineIn").equals("0x01"));
+                if(t.refunded){
+                    t.refundedBy = rs.getString("refundedBy");
+                    t.refundedDate = rs.getString("dateRefunded");
+                }
+                addPurchases(t);
+                return(t);
+            }            
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction for snapcoin admin", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return null;
+    }
+    
+    public static void addPurchases(Transaction t){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+            stmt = conn.prepareStatement("select * from Purchase where tid = '" + t.transactionId + "';");
+            System.out.println(stmt);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                FoodItem f = new FoodItem(rs.getString("Food_Name"), Integer.parseInt(rs.getString("Quantity")), Double.parseDouble(rs.getString("Total_Price")));
+                t.addFoodItem(f);
+            }            
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to retrieve transaction for snapcoin admin", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
     }
 }

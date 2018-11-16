@@ -164,4 +164,25 @@ public class DiscountDao {
         return false;
     }
     
+    public static double getDiscountAmount(String companyName, String outletName, String name){
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectionManager.getConnection();
+
+            stmt = conn.prepareStatement("Select * from discount where CompanyName like '" + companyName + "' and OutletName like '" + outletName + "' and Discount_Name like '" + name + "';");
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                return rs.getDouble("Discount_Percentage");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable find '" + name + "' from discount", ex);
+        } finally {
+            ConnectionManager.close(conn, stmt, rs);
+        }
+        return 0.0;
+    }
+    
 }

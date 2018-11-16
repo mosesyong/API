@@ -77,6 +77,7 @@ public class Transaction {
         }else{
             this.refunded = false;
         }
+        foodList = new ArrayList<>();
     }
     
     public void addFoodItem(FoodItem foodItem){

@@ -107,9 +107,9 @@ public class TransactionInputServlet extends HttpServlet {
                     transaction.addFoodItem(foodItem);
                 }
                 double totalPrice = transaction.getTotalPrice();
-                boolean result = TransactionDao.addTransaction(transaction);
-                if(result){
-                    response.setStatus(HttpServletResponse.SC_ACCEPTED);
+                int result = TransactionDao.addTransaction(transaction);
+                if(result != 0){
+                    out.println("{\"tid\" : " + result + "}");
                 }else{
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
