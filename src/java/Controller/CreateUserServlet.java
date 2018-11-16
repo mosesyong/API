@@ -45,7 +45,7 @@ public class CreateUserServlet extends HttpServlet {
             String subCreator = request.getParameter("subCreator");
             String type = request.getParameter("type");
             
-            boolean directlyCreating = subCreator == null;
+            boolean directlyCreating = subCreator != null;
             HashSet<String> accessSet = new HashSet<>();
             String menuRights = request.getParameter("menuRights");
             if(menuRights.equals("1")){

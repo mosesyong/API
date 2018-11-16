@@ -682,10 +682,10 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("update user set deleted = 0x01 , where username = '" + username + "' and companyName = '" + companyName + "' and outletName = '" + outletName + "';");
+            stmt = conn.prepareStatement("update user set deleted = 0x01 where username = '" + username + "' and companyName = '" + companyName + "' and outletName = '" + outletName + "';");
             stmt.executeUpdate();
         } catch (SQLException ex) {
-            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to access '" + username + "' outlet", ex);
+            Logger.getLogger(LoginDao.class.getName()).log(Level.SEVERE, "Unable to set '" + username + "' as deleted", ex);
             return false;
         } finally {
             ConnectionManager.close(conn, stmt, rs);
@@ -703,7 +703,7 @@ public class UserDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select Parent from user where child  = '" + username + "';");
+            stmt = conn.prepareStatement("select Parent from hierarchy where child  = '" + username + "';");
             
             rs = stmt.executeQuery();
             
