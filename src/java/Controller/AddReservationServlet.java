@@ -64,9 +64,9 @@ public class AddReservationServlet extends HttpServlet {
             boolean result = ReservationDao.addReservation(new Reservation(companyName, outletName, customerName, customerPhoneNumber, pax, dateTime));
             
             if(result){
-                out.println("{status:\"success\"}");
+                out.println("{\"status\":\"success\"}");
             }else{
-                out.println("{status:\"fail\"}");
+                out.println("{\"status\":\"fail\"}");
             }
         }
     }

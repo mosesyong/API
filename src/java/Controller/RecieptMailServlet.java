@@ -62,11 +62,11 @@ public class RecieptMailServlet extends HttpServlet {
             
             try{
                 MailDao.sendCustomMail(email, subject, message);
-                out.println("{status:\"success\"}");
+                out.println("{\"status\":\"success\"}");
             }catch (Exception e){
                 e.printStackTrace();
                 System.out.println(e.getMessage());
-                out.println("{status:\"fail\"}");
+                out.println("{\"status\":\"fail\"}");
             }
         }
     }

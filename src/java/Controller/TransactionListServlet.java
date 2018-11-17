@@ -62,6 +62,8 @@ public class TransactionListServlet extends HttpServlet {
                     transactionObject.addProperty("totalPrice", t.totalPrice);
                     transactionObject.addProperty("date", t.dateTime);
                     transactionObject.addProperty("type", t.type);
+                    transactionObject.addProperty("discountName", t.discountName);
+                    transactionObject.addProperty("dineIn", t.dineIn);
                     transactionObject.addProperty("refunded", t.refunded);
                     transactionObject.addProperty("refundedBy", t.refundedBy);
                     transactionObject.addProperty("refundedDate", t.refundedDate);
