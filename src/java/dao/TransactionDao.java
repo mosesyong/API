@@ -122,7 +122,7 @@ public class TransactionDao {
         try {
             conn = ConnectionManager.getConnection();
 
-            stmt = conn.prepareStatement("select t.tid, refunded, t.Employee_Name, type, Date, Food_Name, Discount_Name, p.Total_Price, quantity from transaction t, purchase p where t.tid = p.TID and t.companyName like '" + companyName + "' and t.outletName like '" + outletName + "';");
+            stmt = conn.prepareStatement("select t.tid, refunded, refundedBy, dateRefunded, t.Employee_Name, type, Date, Food_Name, Discount_Name, p.Total_Price, quantity from transaction t, purchase p where t.tid = p.TID and t.companyName like '" + companyName + "' and t.outletName like '" + outletName + "';");
             System.out.println("transaction stmt " + stmt );
             rs = stmt.executeQuery();
 
@@ -130,6 +130,8 @@ public class TransactionDao {
                 AnalyticsEntity entity = new AnalyticsEntity(rs.getString("Type"), rs.getString("Date"), rs.getString("Food_Name"), rs.getInt("quantity"), rs.getDouble("Total_Price"), rs.getString("tid"), rs.getString("Discount_Name"), rs.getString("Employee_Name"));
                 if(rs.getString("Refunded").equals("1")){
                     entity.refunded = true;
+                    entity.refundedBy = rs.getString("refundedBy");
+                    entity.refundedDate = rs.getString("dateRefunded");
                 }
                 result.add(entity);
             }

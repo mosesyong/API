@@ -19,6 +19,8 @@ public class AnalyticsEntity {
     public String discountName;
     public String cashierName;
     public boolean refunded = false;
+    public String refundedBy = null;
+    public String refundedDate = null;
     
     public AnalyticsEntity(String paymentType, String dateTime, String foodName, int quantity, double totalPrice, String TID, String discountName, String cashierName){
         this.paymentType = paymentType;
