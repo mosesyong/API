@@ -43,6 +43,10 @@ public class TransactionOutputServlet extends HttpServlet {
             String companyName = request.getParameter("companyName");
             String outletName = request.getParameter("outletName");
             
+            if(outletName == null || outletName.length() == 0){
+                outletName = "%";
+            }
+            
             ArrayList<AnalyticsEntity> analyticsResultList = TransactionDao.getAnalytics(companyName, outletName);
             
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -51,6 +55,8 @@ public class TransactionOutputServlet extends HttpServlet {
             
             for(AnalyticsEntity entity : analyticsResultList){
                 JsonObject analyticsObject = new JsonObject();
+                analyticsObject.addProperty("companyName", entity.companyName);
+                analyticsObject.addProperty("outletName", entity.outletName);
                 analyticsObject.addProperty("foodName", entity.foodName);
                 analyticsObject.addProperty("quantity", entity.quantity);
                 analyticsObject.addProperty("totalPrice", entity.totalPrice);
@@ -67,7 +73,6 @@ public class TransactionOutputServlet extends HttpServlet {
             
 //            Calendar cal = Calendar.getInstance();
 //            overall.addProperty("timezone", cal.getTimeZone().getID().equals("Etc/UTC"));
-            
             overall.add("result", analyticsArr);
             out.println(overall);
             
