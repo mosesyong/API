@@ -46,7 +46,7 @@ public class DiscountDao {
             conn = ConnectionManager.getConnection();
             
             
-            stmt = conn.prepareStatement("insert into discount (CompanyName, OutletName, Discount_Name, Discount_Percentage) values ('" + companyName + "', '" + outletName + "', '" + name + "', '" + discountPercentage + "');");
+            stmt = conn.prepareStatement("insert into discount (CompanyName, OutletName, Discount_Name, Discount_Percentage) values ('" + companyName + "', '" + outletName + "', '" + name + "', '" + discountPercentage/100 + "');");
             
             System.out.println("discount query: " + stmt);
             stmt.executeUpdate();
