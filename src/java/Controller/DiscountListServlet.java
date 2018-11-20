@@ -48,12 +48,6 @@ public class DiscountListServlet extends HttpServlet {
             
             ArrayList<Discount> discountList = DiscountDao.getDiscounts(companyName, outletName);
             
-            Discount snapcoinDiscount = DiscountDao.getSnapcoinDiscount();
-          
-            if(snapcoinDiscount != null){
-               discountList.add(snapcoinDiscount);
-            }            
-            
             if(discountList != null){
                 for(Discount d : discountList){
                     JsonObject discountObj = new JsonObject();

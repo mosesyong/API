@@ -6,6 +6,7 @@
 package Controller;
 
 import dao.CreateDao;
+import dao.DiscountDao;
 import dao.LoginDao;
 import dao.MailDao;
 import dao.UserDao;
@@ -93,7 +94,8 @@ public class CreateUserServlet extends HttpServlet {
             boolean result = CreateDao.create(username, password, email, companyName, outletName, creator, type, accessSet);
             System.out.println("Create " + username + " result: " + result);
             if(result){
-                //Email hardcoded to send to user:test email. Next time, add email param to request and call username of provided user
+                DiscountDao.addSnapCoinDiscount(companyName, outletName);
+                
                 MailDao.sendMail(username, "Welcome " + username, "Welcome to snapcoin-pos. Your username is: " + username + " and your temporary password is: " + password + "\nThank you for signing up with us :)\nDon't forget to reset your password as soon as you log in!");
                 response.setStatus(HttpServletResponse.SC_ACCEPTED); //202
             }else{

@@ -62,6 +62,8 @@ public class DiscountDao {
     public static ArrayList<Discount> getDiscounts(String companyName, String outletName){
         ArrayList<Discount> discountList = new ArrayList<>();
         
+//        discountList.add(getSnapcoinDiscount());
+        
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -87,7 +89,7 @@ public class DiscountDao {
         return null;
     }
     
-    public static Discount getSnapcoinDiscount(){
+    public static Discount getSnapcoinDiscount(String companyName, String outletName){
         try {
             HttpHost target = new HttpHost("18.217.167.135", 80, "http"); // change ip if necessary
             
@@ -98,7 +100,7 @@ public class DiscountDao {
             JsonParser parser = new JsonParser();
             JsonObject jo = (JsonObject) parser.parse(EntityUtils.toString(entity));
             double snapcoinDiscountAmount = jo.get("Snapcoin_Discount").getAsDouble();
-            Discount snapcoinDiscount = new Discount("Snapcoin Discount", snapcoinDiscountAmount);
+            Discount snapcoinDiscount = new Discount("Snapcoin Discount", companyName, outletName, snapcoinDiscountAmount);
             
             
             return snapcoinDiscount;       
@@ -162,6 +164,12 @@ public class DiscountDao {
             }
         }
         return false;
+    }
+    
+    public static boolean addSnapCoinDiscount(String companyName, String outletName){
+        Discount snapcoinDiscount = getSnapcoinDiscount(companyName, outletName);
+                
+        return addDiscount(snapcoinDiscount);
     }
     
     public static double getDiscountAmount(String companyName, String outletName, String name){

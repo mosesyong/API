@@ -90,6 +90,7 @@ public class MenuRequestServlet extends HttpServlet {
                 JsonArray discountArray = new JsonArray();
             
             ArrayList<Discount> discountList = DiscountDao.getDiscounts(companyName, outletName);
+            
             if(discountList != null){
                 for(Discount d : discountList){
                     JsonObject discountObj = new JsonObject();
@@ -98,6 +99,8 @@ public class MenuRequestServlet extends HttpServlet {
                     discountArray.add(discountObj);
                 }
             }
+            
+            
             overall.add("discount", discountArray);
             
             out.println(overall);

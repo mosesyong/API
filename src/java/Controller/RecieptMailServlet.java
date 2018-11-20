@@ -38,32 +38,41 @@ public class RecieptMailServlet extends HttpServlet {
         response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         response.addHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
         try (PrintWriter out = response.getWriter()) {
-            String email = request.getParameter("email");
-            String name = request.getParameter("name");
-            String subtotal = request.getParameter("subtotal");
-            String id = request.getParameter("id");
-            
-            Transaction t = TransactionDao.getTransaction(id);
-            
-            String subject = "E-reciept from " + t.companyName + "@" + t.outletName;
-            String message = "Issued to: " + name + "\nDate: " + t.dateTime + "\n\n";
-            message += "Items:\n";
-            for(FoodItem f : t.foodList){
-                message += f.quantity + " x " + f.foodName + " ($" + f.totalPrice + ")\n";
-            }
-            message += "\nSubtotal: $" + subtotal + "\n";
-            if(t.discountName.equals("null")){
-                message += "\nDiscount: None\n"; 
-            }else{
-                message += "\nDiscount: " + t.discountName + " (" + DiscountDao.getDiscountAmount(t.companyName, t.outletName, t.discountName)*100 + "%)\n";
-            }
-            message += "Total: $" + t.totalPrice + "\n\n";
-            message += "Thank you for your purchase!\nSee you again :)";
-            
             try{
-                MailDao.sendCustomMail(email, subject, message);
-                out.println("{\"status\":\"success\"}");
-            }catch (Exception e){
+                String email = request.getParameter("email");
+                String name = request.getParameter("name");
+                String subtotal = request.getParameter("subtotal");
+                String id = request.getParameter("id");
+                
+                if(email == null || name == null || email.length() == 0 || name.length() == 0 ){
+                    throw new RuntimeException("Name or email is invalid");
+                }
+                Transaction t = TransactionDao.getTransaction(id);
+
+                String subject = "E-reciept from " + t.companyName + "@" + t.outletName;
+                String message = "Issued to: " + name + "\nDate: " + t.dateTime + "\n\n";
+                message += "Items:\n";
+                for(FoodItem f : t.foodList){
+                    message += f.quantity + " x " + f.foodName + " ($" + f.totalPrice + ")\n";
+                }
+                message += "\nSubtotal: $" + subtotal + "\n";
+                if(t.discountName.equals("null")){
+                    message += "\nDiscount: None\n"; 
+                }else{
+                    message += "\nDiscount: " + t.discountName + " (" + DiscountDao.getDiscountAmount(t.companyName, t.outletName, t.discountName)*100 + "%)\n";
+                }
+                message += "Total: $" + t.totalPrice + "\n\n";
+                message += "Thank you for your purchase!\nSee you again :)";
+
+                try{
+                    MailDao.sendCustomMail(email, subject, message);
+                    out.println("{\"status\":\"success\"}");
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    out.println("{\"status\":\"fail\"}");
+                }
+            }catch(Exception e){
                 e.printStackTrace();
                 System.out.println(e.getMessage());
                 out.println("{\"status\":\"fail\"}");
