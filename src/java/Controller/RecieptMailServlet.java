@@ -49,7 +49,7 @@ public class RecieptMailServlet extends HttpServlet {
                 }
                 Transaction t = TransactionDao.getTransaction(id);
 
-                String subject = "E-reciept from " + t.companyName + "@" + t.outletName;
+                String subject = "E-receipt from " + t.companyName + "@" + t.outletName;
                 String message = "Issued to: " + name + "\nDate: " + t.dateTime + "\n\n";
                 message += "Items:\n";
                 for(FoodItem f : t.foodList){
